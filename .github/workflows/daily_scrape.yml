@@ -19,7 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas cloudscraper beautifulsoup4
+          python -m pip install --upgrade pip
+          pip install pandas numpy cloudscraper beautifulsoup4
 
       - name: Run Scraper
         run: python scraper.py
