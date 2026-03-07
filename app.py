@@ -38,31 +38,48 @@ def get_category(item_name):
 
 def fetch_live_market_data():
     if os.path.exists("price_history.csv"):
-        # Force refresh data from CSV
-        df = pd.read_csv("price_history.csv")
-        if df.empty: return []
-        
-        latest_items = []
-        for item_name in df['item'].unique():
-            item_history = df[df['item'] == item_name].sort_values('timestamp')
-            latest_row = item_history.iloc[-1]
-            current_price = latest_row['price']
+        try:
+            df = pd.read_csv("price_history.csv")
+            if df.empty:
+                return []
             
-            # --- SAFETY CHECK FOR PRICE CHANGE ---
-            change_pct = 0.0
-            if len(item_history) > 1:
-                prev_price = item_history.iloc[-2]['price']
-                if prev_price and prev_price != 0:
-                    change_pct = ((current_price - prev_price) / prev_price) * 100
-            
-            latest_items.append({
-                "item": item_name,
-                "price": current_price,
-                "change": round(change_pct, 2),
-                "source": latest_row['source'],
-                "category": get_category(item_name)
-            })
-        return latest_items
+            latest_items = []
+            for item_name in df['item'].unique():
+                # Get history for this specific item
+                item_history = df[df['item'] == item_name].sort_values('timestamp')
+                
+                # Get the most recent row
+                latest_row = item_history.iloc[-1]
+                
+                # FORCE values to floats to prevent TypeErrors
+                try:
+                    current_price = float(latest_row['price'])
+                except (ValueError, TypeError):
+                    continue # Skip if price is corrupted
+                
+                change_pct = 0.0
+                
+                # ONLY calculate change if we have at least 2 rows
+                if len(item_history) > 1:
+                    try:
+                        prev_price = float(item_history.iloc[-2]['price'])
+                        # Safety check: No division by zero and no None values
+                        if prev_price and not pd.isna(prev_price) and prev_price != 0:
+                            change_pct = ((current_price - prev_price) / prev_price) * 100
+                    except (ValueError, TypeError):
+                        change_pct = 0.0
+                
+                latest_items.append({
+                    "item": item_name,
+                    "price": current_price,
+                    "change": round(change_pct, 2),
+                    "source": latest_row.get('source', 'Market'),
+                    "category": get_category(item_name)
+                })
+            return latest_items
+        except Exception as e:
+            st.error(f"Error reading CSV: {e}")
+            return []
     return []
 
 # --- 4. DATA INITIALIZATION ---
@@ -134,4 +151,5 @@ else:
                            pd.DataFrame(raw_market_data).to_csv(index=False), 
                            "market_report.csv", "text/csv")
         st.markdown('</div>', unsafe_allow_html=True)
+
 
