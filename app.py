@@ -31,11 +31,17 @@ def get_category(item_name):
     return "Others"
 
 def fetch_live_market_data():
-    file_path = "price_history.csv"
+    # This finds the EXACT folder where your app is running
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_dir, "price_history.csv")
+    
     if os.path.exists(file_path):
         try:
-            df = pd.read_csv(file_path)
+            # Force pandas to re-read the file without using old cache
+            df = pd.read_csv(file_path).drop_duplicates()
             if df.empty: return []
+            
+            # ... (rest of your existing logic)
             latest_items = []
             for item_name in df['item'].unique():
                 item_history = df[df['item'] == item_name].sort_values('timestamp')
@@ -87,3 +93,4 @@ else:
             st.metric("Total Tracked Items", len(raw_data))
             st.info("Neural Engine active. Data syncing with GitHub Actions.")
         st.markdown('</div>', unsafe_allow_html=True)
+
