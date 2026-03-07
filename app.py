@@ -35,7 +35,9 @@ def get_category(item_name):
     return "Others"
 
 def fetch_live_market_data():
-    if os.path.exists("price_history.csv"):
+    file_path = os.path.join(os.getcwd(), "price_history.csv")
+if os.path.exists(file_path):
+    df = pd.read_csv(file_path)
         try:
             df = pd.read_csv("price_history.csv")
             if df.empty: return []
@@ -154,3 +156,4 @@ else:
             if abs(i['change']) > 0:
                 st.markdown(f'<div class="alert-card-high"><b>VOLATILITY:</b> {i["item"]} shifted {i["change"]}%</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
