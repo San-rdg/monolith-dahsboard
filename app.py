@@ -1,4 +1,13 @@
 import streamlit as st
+
+# Force the app to check for new data instead of using old cache
+st.cache_data.clear() 
+
+def load_data():
+    return pd.read_csv("price_history.csv")
+
+df = load_data()
+import streamlit as st
 import pandas as pd
 import numpy as np
 import os
