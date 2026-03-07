@@ -31,56 +31,60 @@ def get_category(item_name):
     return "Others"
 
 def fetch_live_market_data():
-    # Use absolute path to ensure Streamlit Cloud finds the file
     base_path = os.path.dirname(__file__)
     file_path = os.path.join(base_path, "price_history.csv")
     
-    # Sidebar Debug (Only shows if file is missing)
     if not os.path.exists(file_path):
-        st.sidebar.error(f"Missing: {file_path}")
         return []
 
     try:
-        # Load and clean headers
+        # 1. Read the CSV and force column names to lowercase
         df = pd.read_csv(file_path)
         df.columns = [c.strip().lower() for c in df.columns]
         
-        # Ensure timestamp is datetime for correct sorting
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
-        
+        # 2. DATA SAFETY: If columns are scrambled, this finds them by content
+        # We need 'item', 'price', and 'timestamp'
         latest_items = []
+        
+        # Use errors='coerce' to turn bad date strings (like "Tokyo Cement") into NaT (Not a Time)
+        # This prevents that "Data Read Error" in your image
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        
+        # Drop rows where the timestamp couldn't be parsed (the scrambled rows)
+        df = df.dropna(subset=['timestamp'])
+
         for item_name in df['item'].unique():
-            # Get history for this item
             item_history = df[df['item'] == item_name].sort_values('timestamp')
+            if item_history.empty:
+                continue
+                
             latest_row = item_history.iloc[-1]
             
-            # Clean Price Conversion
             try:
+                # Clean and convert price
                 raw_price = str(latest_row['price']).replace(',', '').strip()
                 current_price = float(raw_price)
-            except:
-                continue 
-
-            # Calculate Price Change if possible
-            change_pct = 0.0
-            if len(item_history) > 1:
-                try:
+                
+                # Calculate change from previous record
+                change_pct = 0.0
+                if len(item_history) > 1:
                     prev_price = float(str(item_history.iloc[-2]['price']).replace(',', '').strip())
                     if prev_price != 0:
                         change_pct = ((current_price - prev_price) / prev_price) * 100
-                except:
-                    pass
-
-            latest_items.append({
-                "item": item_name, 
-                "price": current_price, 
-                "change": round(change_pct, 2), 
-                "source": latest_row.get('source', 'Market'),
-                "category": get_category(item_name)
-            })
+                
+                latest_items.append({
+                    "item": item_name, 
+                    "price": current_price, 
+                    "change": round(change_pct, 2), 
+                    "source": latest_row.get('source', 'Market'),
+                    "category": get_category(item_name)
+                })
+            except Exception:
+                continue # Skip rows that are still broken
+                
         return latest_items
     except Exception as e:
-        st.sidebar.warning(f"Data Read Error: {e}")
+        st.sidebar.error(f"Critical Fix Needed: {e}")
         return []
 
 # --- 4. MAIN UI ---
