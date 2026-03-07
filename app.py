@@ -33,27 +33,32 @@ def get_category(item_name):
 def fetch_live_market_data():
     file_path = "price_history.csv"
     
-    # 1. If the file is missing, create "Emergency Data" so the app doesn't stay blank
     if not os.path.exists(file_path):
-        st.info("🔄 Initializing System Data...")
-        # This creates 5 basic items so the dashboard actually loads
-        emergency_data = pd.DataFrame([
-            {"timestamp": datetime.now(), "item": "Tokyo Super Cement (50kg)", "price": 2250, "source": "System Initializer"},
-            {"timestamp": datetime.now(), "item": "Melwa TMT Steel 10mm", "price": 410, "source": "System Initializer"},
-            {"timestamp": datetime.now(), "item": "River Sand (1 Cube)", "price": 24500, "source": "System Initializer"}
-        ])
-        emergency_data.to_csv(file_path, index=False)
+        return []
 
-    # 2. Now read the file (either the one from GitHub or the Emergency one we just made)
     try:
+        # 1. Read the CSV
         df = pd.read_csv(file_path)
+        
+        # 2. Clean up any empty spaces in column names
+        df.columns = [c.strip().lower() for c in df.columns]
+        
         latest_items = []
+        # 3. Use the actual column names to pull data
         for item_name in df['item'].unique():
             item_history = df[df['item'] == item_name].sort_values('timestamp')
             latest_row = item_history.iloc[-1]
+            
+            # --- FIX: Explicitly pull by name and convert to float ---
+            try:
+                price_val = str(latest_row['price']).replace(',', '') # Remove commas if any
+                current_price = float(price_val)
+            except:
+                continue # Skip if this row is truly broken
+
             latest_items.append({
                 "item": item_name, 
-                "price": float(latest_row['price']), 
+                "price": current_price, 
                 "change": 0.0, 
                 "source": latest_row.get('source', 'Market'),
                 "category": get_category(item_name)
