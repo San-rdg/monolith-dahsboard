@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 # Force the app to check for new data instead of using old cache
@@ -189,4 +190,5 @@ with col_right:
     st.markdown("""
         <div class="feature-box"><div class="icon-box">🕷️</div><div><h4>Auto-Scrapers</h4><div class="metric-small">Hunting data 24/7</div></div></div>
         <div class="feature-box"><div class="icon-box" style="color:#2EA043; border-color:#2EA043;">🧠</div><div><h4>AI Engine</h4><div class="metric-small">Forecasts Active</div></div></div>
+
     """, unsafe_allow_html=True)
