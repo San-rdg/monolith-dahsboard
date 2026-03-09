@@ -9,220 +9,164 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(page_title="MONOLITH | INTELLIGENCE GRID", page_icon="🏗️", layout="wide")
 st_autorefresh(interval=30000, key="datarefresh")
 
-# --- 2. PREMIUM STYLING (CSS) ---
+# --- 2. TACTICAL STYLING (PALANTIR-INSPIRED) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
 
     :root {
-        --primary: #58a6ff;
-        --secondary: #3fb950;
-        --danger: #f85149;
-        --bg: #0d1117;
-        --card-bg: rgba(22, 27, 34, 0.7);
-        --border: rgba(48, 54, 61, 0.8);
-        --glass-border: rgba(88, 166, 255, 0.2);
+        --bg-deep: #0e1217;
+        --bg-surface: #15191e;
+        --border-muted: #2a2f35;
+        --accent-primary: #3d8bff;
+        --accent-success: #2ea043;
+        --accent-warning: #d29922;
+        --text-main: #c9d1d9;
+        --text-dim: #8b949e;
     }
 
     .stApp {
-        background: radial-gradient(circle at 50% 50%, #161b22 0%, #0d1117 100%);
-        color: #e6edf3;
-        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-deep);
+        color: var(--text-main);
+        font-family: 'IBM Plex Sans', sans-serif;
     }
 
-    /* Animated Background Mesh */
+    /* System Grid Overlay */
     .stApp::before {
         content: "";
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
         background-image: 
-            radial-gradient(at 0% 0%, hsla(210,100%,15%,0.15) 0, transparent 50%), 
-            radial-gradient(at 50% 0%, hsla(150,100%,15%,0.1) 0, transparent 50%),
-            radial-gradient(at 100% 0%, hsla(0,100%,15%,0.1) 0, transparent 50%);
-        z-index: -1;
-        animation: meshMove 20s ease infinite alternate;
+            linear-gradient(var(--border-muted) 1px, transparent 1px),
+            linear-gradient(90deg, var(--border-muted) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.03;
+        pointer-events: none;
+        z-index: 0;
     }
 
-    @keyframes meshMove {
-        0% { filter: hue-rotate(0deg); }
-        100% { filter: hue-rotate(30deg); }
-    }
-
-    /* Glassmorphism Cards with Staggered Entry */
+    /* Sharp Industrial Cards */
     .dashboard-card {
-        background: var(--card-bg);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 28px;
-        margin-bottom: 24px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-muted);
+        border-radius: 2px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         position: relative;
-        overflow: hidden;
+        transition: border-color 0.2s ease;
+        animation: tacticalEntry 0.3s ease-out backwards;
     }
 
     .dashboard-card:hover {
-        transform: translateY(-8px) scale(1.01);
-        border-color: var(--primary);
-        box-shadow: 0 12px 48px 0 rgba(88, 166, 255, 0.15);
+        border-color: var(--accent-primary);
     }
 
-    /* Scanning Light Effect */
-    .dashboard-card::after {
-        content: "";
-        position: absolute;
-        top: -150%; left: -150%;
-        width: 300%; height: 300%;
-        background: linear-gradient(
-            45deg,
-            transparent 45%,
-            rgba(88, 166, 255, 0.05) 48%,
-            rgba(88, 166, 255, 0.1) 50%,
-            rgba(88, 166, 255, 0.05) 52%,
-            transparent 55%
-        );
-        transform: rotate(-45deg);
-        animation: scan 6s linear infinite;
-        pointer-events: none;
-    }
-
-    @keyframes scan {
-        0% { transform: translateY(0) translateX(0) rotate(-45deg); }
-        100% { transform: translateY(50%) translateX(50%) rotate(-45deg); }
-    }
-
-    @keyframes slideUp {
-        from { opacity: 0; transform: translateY(30px); }
+    @keyframes tacticalEntry {
+        from { opacity: 0; transform: translateY(4px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Header Styling */
-    h1 {
-        font-size: 48px;
-        font-weight: 900;
-        letter-spacing: -1.5px;
-        background: linear-gradient(135deg, #ffffff 0%, #8899aa 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 40px !important;
-        animation: fadeIn 1.5s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .card-header {
-        color: var(--primary);
-        font-weight: 800;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .card-header::before {
-        content: "";
-        width: 4px;
-        height: 18px;
-        background: var(--primary);
-        border-radius: 2px;
-    }
-
-    /* Feed Row Animation */
-    .feed-row {
+    /* System Status Header */
+    .sys-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 12px;
-        border-bottom: 1px solid var(--border);
-        transition: background 0.3s ease;
-        border-radius: 8px;
+        padding: 10px 15px;
+        background: #1c2128;
+        border-bottom: 2px solid var(--accent-primary);
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        margin-bottom: 24px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: -0.5px;
+        margin-bottom: 30px !important;
+        padding-left: 10px;
+        border-left: 4px solid var(--accent-primary);
+    }
+
+    .card-header {
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 0.85rem;
+        border-bottom: 1px solid var(--border-muted);
+        padding-bottom: 12px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-tag {
+        background: rgba(61, 139, 255, 0.1);
+        color: var(--accent-primary);
+        padding: 2px 8px;
+        font-size: 0.65rem;
+        font-family: 'IBM Plex Mono', monospace;
+        border: 1px solid var(--accent-primary);
+        border-radius: 2px;
+    }
+
+    /* High Density Feed */
+    .feed-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        padding: 10px 8px;
+        border-bottom: 1px solid #1c2128;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.85rem;
     }
 
     .feed-row:hover {
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(255, 255, 255, 0.02);
     }
 
-    .feed-item-name {
-        color: #e6edf3;
-        font-size: 1.05rem;
-        font-weight: 600;
-    }
+    .feed-item-name { color: var(--accent-primary); font-weight: 600; }
+    .feed-price { color: #ffffff; font-weight: 600; }
+    .feed-id { color: var(--text-dim); font-size: 0.7rem; }
 
-    .feed-price {
-        color: #ffffff;
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 700;
-        font-size: 1.15rem;
-    }
-
-    /* Total Display Enhancement */
+    /* Tactical Value Display */
     .total-display {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 30px;
-        text-align: center;
-        margin-top: 25px;
-        position: relative;
+        border-left: 2px solid var(--accent-success);
+        background: #0d1117;
+        padding: 20px;
+        margin-top: 15px;
     }
 
     .total-label {
-        color: #8b949e;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 10px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        margin-bottom: 5px;
     }
 
     .total-value {
-        color: var(--secondary);
-        font-size: 2.8rem;
-        font-weight: 800;
-        font-family: 'JetBrains Mono', monospace;
-        text-shadow: 0 0 20px rgba(63, 185, 80, 0.3);
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 2.2rem;
+        color: var(--accent-success);
+        font-weight: 700;
     }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-muted); }
 
     .live-indicator {
-        color: var(--danger);
-        animation: pulse 2s infinite;
+        width: 8px;
+        height: 8px;
+        background: var(--accent-success);
+        border-radius: 50%;
         display: inline-block;
-        margin-right: 10px;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(0.95); opacity: 0.5; }
-        50% { transform: scale(1.1); opacity: 1; }
-        100% { transform: scale(0.95); opacity: 0.5; }
-    }
-
-    /* Tabs Styling Override */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background: transparent;
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 8px !important;
-        background-color: transparent !important;
-        font-weight: 600;
-    }
-    .stTabs [aria-selected="true"] {
-        background-color: rgba(88, 166, 255, 0.1) !important;
-        color: var(--primary) !important;
+        margin-right: 8px;
+        box-shadow: 0 0 8px var(--accent-success);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -297,7 +241,14 @@ def generate_forecast(df, item_name, days_ahead=7):
     return pd.concat([historical_chart, future_chart]), z[0] # Return chart data and the slope (trend direction)
 
 # --- 4. MAIN UI ---
-st.markdown("<h1><span class='live-indicator'>●</span> MONOLITH COMMAND CENTER</h1>", unsafe_allow_html=True)
+st.markdown(f"""
+    <div class="sys-header">
+        <div>SYSTEM: MONOLITH-GRID // SECTOR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
+        <div>LATENCY: 1.2MS // UPTIME: 99.9% // STATUS: NOMINAL</div>
+    </div>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1>MONOLITH COMMAND</h1>", unsafe_allow_html=True)
 
 df_raw = fetch_live_market_data()
 live_items = process_latest_items(df_raw)
@@ -311,18 +262,19 @@ else:
     # LEFT COLUMN: Live Feed
     with col_feed:
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-header">📡 LIVE MARKET FEED</div>', unsafe_allow_html=True)
+        st.markdown('<div class="card-header">DATA INTERROGATION <span class="status-tag">REAL-TIME</span></div>', unsafe_allow_html=True)
         for idx, item in enumerate(live_items):
             arrow = "▲" if item['change'] > 0 else "▼" if item['change'] < 0 else "—"
-            color = "#3fb950" if item['change'] > 0 else "#f85149" if item['change'] < 0 else "#8b949e"
+            color = "var(--accent-success)" if item['change'] > 0 else "var(--danger)" if item['change'] < 0 else "var(--text-dim)"
             st.markdown(f"""
-                <div class="feed-row" style="animation-delay: {idx * 0.1}s; animation-fill-mode: backwards;">
+                <div class="feed-row" style="animation-delay: {idx * 0.05}s;">
                     <div>
-                        <div class="feed-item-name">📦 {item['item']}</div>
+                        <div class="feed-item-name">{item['item']}</div>
+                        <div class="feed-id">HASH: {abs(hash(item['item'])) % 10000} // SRC: {item.get('source', 'AUTO')}</div>
                     </div>
                     <div style="text-align:right;">
-                        <div class="feed-price">Rs. {item['price']:,.2f}</div>
-                        <div style="color:{color}; font-size:0.9rem; font-weight:bold; margin-top: 4px;">{arrow} {abs(item['change'])}%</div>
+                        <div class="feed-price">L {item['price']:,.2f}</div>
+                        <div style="color:{color}; font-size:0.7rem;">{arrow} {abs(item['change'])}%</div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
@@ -367,13 +319,19 @@ else:
                 st.line_chart(chart_data, color=["#58a6ff", "#ff7b72"])
                 
                 # Dynamic text based on the math
+                st.markdown('<div style="margin-top:20px; padding:10px; border:1px solid var(--border-muted); background:rgba(255,255,255,0.02);">', unsafe_allow_html=True)
                 if trend_slope > 0.5:
-                    st.error("🚨 **Warning:** Algorithm predicts price inflation next week. Recommend bulk purchasing now.")
+                    st.markdown("<div style='color:var(--accent-warning); font-family:\"IBM Plex Mono\", monospace; font-size:0.8rem;'>[!] RISK LEVEL: SIGNIFICANT INFLATION</div>", unsafe_allow_html=True)
+                    st.error("🚨 Algorithm predicts price inflation next week. Recommend bulk purchasing now.")
                 elif trend_slope < -0.5:
-                    st.success("📉 **Favorable:** Prices are trending downward. Delaying purchases may save capital.")
+                    st.markdown("<div style='color:var(--accent-success); font-family:\"IBM Plex Mono\", monospace; font-size:0.8rem;'>[+] RISK LEVEL: LOW (DOWNWARD TREND)</div>", unsafe_allow_html=True)
+                    st.success("📉 Prices are trending downward. Delaying purchases may save capital.")
                 else:
-                    st.info("⚖️ **Stable:** Market shows high stability. Price fluctuation unlikely next week.")
+                    st.markdown("<div style='color:var(--accent-primary); font-family:\"IBM Plex Mono\", monospace; font-size:0.8rem;'>[/] RISK LEVEL: NOMINAL</div>", unsafe_allow_html=True)
+                    st.info("⚖️ Market shows high stability. Price fluctuation unlikely next week.")
+                st.markdown('</div>', unsafe_allow_html=True)
                     
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
