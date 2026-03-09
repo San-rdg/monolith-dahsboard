@@ -12,22 +12,218 @@ st_autorefresh(interval=30000, key="datarefresh")
 # --- 2. PREMIUM STYLING (CSS) ---
 st.markdown("""
     <style>
-    .stApp {background-color: #0d1117;}
-    .dashboard-card {
-        background-color: #161b22; border: 1px solid #30363d; 
-        border-radius: 12px; padding: 24px; margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap');
+
+    :root {
+        --primary: #58a6ff;
+        --secondary: #3fb950;
+        --danger: #f85149;
+        --bg: #0d1117;
+        --card-bg: rgba(22, 27, 34, 0.7);
+        --border: rgba(48, 54, 61, 0.8);
+        --glass-border: rgba(88, 166, 255, 0.2);
     }
-    h1 {font-size: 36px; font-weight: 900; color: #ffffff; letter-spacing: 1px;}
-    .card-header {color: #58a6ff; font-weight: 700; font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px;}
-    .feed-row {display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #21262d;}
-    .feed-item-name {color: #e6edf3; font-size: 1.1rem; font-weight: 600;}
-    .feed-price {color: #ffffff; font-family: 'Courier New', monospace; font-weight: 700; font-size: 1.25rem;}
-    .total-display {background: linear-gradient(145deg, #1f242c, #161b22); border: 1px solid #30363d; border-radius: 8px; padding: 20px; text-align: center; margin-top: 20px;}
-    .total-label {color: #8b949e; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;}
-    .total-value {color: #3fb950; font-size: 2.5rem; font-weight: 800; font-family: 'Courier New', monospace;}
-    .live-indicator {color: #ff7b72; animation: blinker 1.5s linear infinite;}
-    @keyframes blinker { 50% { opacity: 0; } }
+
+    .stApp {
+        background: radial-gradient(circle at 50% 50%, #161b22 0%, #0d1117 100%);
+        color: #e6edf3;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Animated Background Mesh */
+    .stApp::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(210,100%,15%,0.15) 0, transparent 50%), 
+            radial-gradient(at 50% 0%, hsla(150,100%,15%,0.1) 0, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(0,100%,15%,0.1) 0, transparent 50%);
+        z-index: -1;
+        animation: meshMove 20s ease infinite alternate;
+    }
+
+    @keyframes meshMove {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(30deg); }
+    }
+
+    /* Glassmorphism Cards with Staggered Entry */
+    .dashboard-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        border-color: var(--primary);
+        box-shadow: 0 12px 48px 0 rgba(88, 166, 255, 0.15);
+    }
+
+    /* Scanning Light Effect */
+    .dashboard-card::after {
+        content: "";
+        position: absolute;
+        top: -150%; left: -150%;
+        width: 300%; height: 300%;
+        background: linear-gradient(
+            45deg,
+            transparent 45%,
+            rgba(88, 166, 255, 0.05) 48%,
+            rgba(88, 166, 255, 0.1) 50%,
+            rgba(88, 166, 255, 0.05) 52%,
+            transparent 55%
+        );
+        transform: rotate(-45deg);
+        animation: scan 6s linear infinite;
+        pointer-events: none;
+    }
+
+    @keyframes scan {
+        0% { transform: translateY(0) translateX(0) rotate(-45deg); }
+        100% { transform: translateY(50%) translateX(50%) rotate(-45deg); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header Styling */
+    h1 {
+        font-size: 48px;
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        background: linear-gradient(135deg, #ffffff 0%, #8899aa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 40px !important;
+        animation: fadeIn 1.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .card-header {
+        color: var(--primary);
+        font-weight: 800;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 25px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-header::before {
+        content: "";
+        width: 4px;
+        height: 18px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    /* Feed Row Animation */
+    .feed-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.3s ease;
+        border-radius: 8px;
+    }
+
+    .feed-row:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .feed-item-name {
+        color: #e6edf3;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .feed-price {
+        color: #ffffff;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        font-size: 1.15rem;
+    }
+
+    /* Total Display Enhancement */
+    .total-display {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        margin-top: 25px;
+        position: relative;
+    }
+
+    .total-label {
+        color: #8b949e;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+
+    .total-value {
+        color: var(--secondary);
+        font-size: 2.8rem;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+        text-shadow: 0 0 20px rgba(63, 185, 80, 0.3);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+    .live-indicator {
+        color: var(--danger);
+        animation: pulse 2s infinite;
+        display: inline-block;
+        margin-right: 10px;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.5; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.5; }
+    }
+
+    /* Tabs Styling Override */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: transparent;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 8px !important;
+        background-color: transparent !important;
+        font-weight: 600;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: rgba(88, 166, 255, 0.1) !important;
+        color: var(--primary) !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -116,11 +312,11 @@ else:
     with col_feed:
         st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
         st.markdown('<div class="card-header">📡 LIVE MARKET FEED</div>', unsafe_allow_html=True)
-        for item in live_items:
+        for idx, item in enumerate(live_items):
             arrow = "▲" if item['change'] > 0 else "▼" if item['change'] < 0 else "—"
             color = "#3fb950" if item['change'] > 0 else "#f85149" if item['change'] < 0 else "#8b949e"
             st.markdown(f"""
-                <div class="feed-row">
+                <div class="feed-row" style="animation-delay: {idx * 0.1}s; animation-fill-mode: backwards;">
                     <div>
                         <div class="feed-item-name">📦 {item['item']}</div>
                     </div>
@@ -179,4 +375,5 @@ else:
                     st.info("⚖️ **Stable:** Market shows high stability. Price fluctuation unlikely next week.")
                     
         st.markdown('</div>', unsafe_allow_html=True)
+
 
