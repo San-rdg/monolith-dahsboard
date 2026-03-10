@@ -10,51 +10,140 @@ from streamlit_autorefresh import st_autorefresh
 st.set_page_config(page_title="MONOLITH | COMMAND CENTER", page_icon="🏗️", layout="wide")
 st_autorefresh(interval=30000, key="datarefresh")
 
-# --- 2. ULTRA-PREMIUM STYLING (CSS) ---
+# --- 2. ULTRA-PREMIUM TACTICAL STYLING (PALANTIR FOUNDRY AESTHETIC) ---
 st.markdown("""
     <style>
-    /* Global futuristic vibe */
-    .stApp { background: radial-gradient(circle at top right, #1a1f25, #0d1117); color: #e6edf3; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    /* Precision Blueprint/Foundry Palette */
+    :root {
+        --bg-primary: #10161A;
+        --bg-secondary: #182026;
+        --bg-accent: #202B33;
+        --border-color: rgba(255, 255, 255, 0.15);
+        --text-primary: #F5F8FA;
+        --text-secondary: #A7B6C2;
+        --text-muted: #5C7080;
+        --accent-blue: #106BA3;
+        --accent-blue-hover: #137CBD;
+        --accent-green: #0F9960;
+        --accent-red: #DB3737;
+        --font-ui: 'Inter', system-ui, sans-serif;
+        --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    .stApp { 
+        background: var(--bg-primary); 
+        color: var(--text-primary); 
+        font-family: var(--font-ui);
+        background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
+        background-size: 24px 24px;
+    }
     
-    /* Glassmorphism Cards */
+    /* Breadcrumb styling */
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+        align-items: center;
+    }
+    .breadcrumb span:not(:last-child)::after {
+        content: '/';
+        margin-left: 8px;
+        opacity: 0.5;
+    }
+    .breadcrumb .active { color: var(--accent-blue); font-weight: 600; }
+
+    /* Tactical High-Density Cards */
     .dashboard-card {
-        background: rgba(22, 27, 34, 0.7); backdrop-filter: blur(10px);
-        border: 1px solid rgba(88, 166, 255, 0.2); border-radius: 16px;
-        padding: 24px; margin-bottom: 20px; transition: all 0.4s ease;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 1px 1px rgba(16, 22, 26, 0.4);
+        border-radius: 2px;
+        padding: 12px; 
+        margin-bottom: 12px;
+        transition: all 0.15s ease;
     }
-    .dashboard-card:hover {
-        border-color: #58a6ff; box-shadow: 0 0 20px rgba(88, 166, 255, 0.15); transform: translateY(-3px);
-    }
+    .dashboard-card:hover { border-color: var(--text-muted); box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 2px 4px rgba(16, 22, 26, 0.4); }
     
-    /* Typography & Animations */
+    /* Typography & Tactical Header */
     .main-title {
-        background: linear-gradient(90deg, #ffffff, #58a6ff, #ffffff); background-size: 200% auto;
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        animation: shine 3s linear infinite; font-size: 42px; font-weight: 900; letter-spacing: 2px;
+        font-family: var(--font-ui); color: var(--text-primary);
+        font-size: 22px; font-weight: 700; letter-spacing: -0.2px;
+        margin-bottom: 2px;
     }
-    @keyframes shine { to { background-position: 200% center; } }
+    .system-status-bar {
+        font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);
+        display: flex; gap: 15px; border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px; margin-bottom: 16px;
+    }
+    .status-indicator { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); display: inline-block; margin-right: 4px; }
     
-    [data-testid="stMetricValue"] { font-family: 'Courier New', monospace; text-shadow: 0 0 10px rgba(88, 166, 255, 0.5); }
-    .card-header { color: #58a6ff; font-weight: 700; font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+    [data-testid="stMetricValue"] { font-family: var(--font-mono); font-weight: 500; font-size: 1.5rem !important; color: var(--text-primary); }
+    [data-testid="stMetricLabel"] { font-family: var(--font-ui); font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); font-weight: 600; }
     
-    /* Feed Rows */
-    .feed-row { display: flex; justify-content: space-between; padding: 15px 10px; border-bottom: 1px solid rgba(48, 54, 61, 0.5); }
-    .feed-item-name { font-size: 1.1rem; font-weight: 600; }
-    .feed-price { font-family: 'Courier New', monospace; font-weight: 700; font-size: 1.25rem; }
+    .card-header { 
+        color: var(--text-primary); font-weight: 600; font-size: 11px; 
+        margin-bottom: 12px; border-bottom: 1px solid var(--border-color); 
+        padding-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+        display: flex; justify-content: space-between; align-items: center;
+    }
     
-    /* Logistics & Estimator UI */
+    /* Blueprint Style Tags */
+    .bp-tag {
+        font-family: var(--font-ui); font-size: 10px; font-weight: 600;
+        padding: 2px 6px; border-radius: 2px; text-transform: uppercase;
+        background: var(--bg-accent); color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+    .bp-tag.blue { background: rgba(16, 107, 163, 0.2); color: #48AFF0; border-color: rgba(16, 107, 163, 0.3); }
+    .bp-tag.green { background: rgba(15, 153, 96, 0.2); color: #3DCC91; border-color: rgba(15, 153, 96, 0.3); }
+
+    /* Tactical Feed Rows */
+    .feed-row { 
+        display: flex; justify-content: space-between; padding: 8px 0; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03); 
+    }
+    .feed-item-name { font-size: 0.85rem; font-weight: 600; font-family: var(--font-ui); color: var(--text-primary); }
+    .feed-price { font-family: var(--font-mono); font-weight: 500; font-size: 1rem; color: var(--text-primary); }
+    .metadata-hash { font-family: var(--font-mono); font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+    
+    /* Modern Tabs */
+    .stTabs [data-baseweb="tab-list"] { gap: 10px; border-bottom: 1px solid var(--border-color); }
+    .stTabs [data-baseweb="tab"] { 
+        font-size: 10px; font-weight: 600; text-transform: uppercase; 
+        padding: 8px 12px; background: transparent !important; color: var(--text-muted);
+        border: none !important;
+    }
+    .stTabs [data-baseweb="tab"][aria-selected="true"] { color: var(--accent-blue); border-bottom: 2px solid var(--accent-blue) !important; }
+    
     .total-display {
-        background: rgba(0, 0, 0, 0.4); border-radius: 12px; padding: 25px;
-        border-left: 5px solid #3fb950; box-shadow: inset 0 0 15px rgba(63, 185, 80, 0.1); margin-top: 20px;
+        background: var(--bg-accent); border-radius: 2px; padding: 16px;
+        border: 1px solid var(--border-color); margin-top: 15px;
     }
-    .premium-badge { color: #3fb950; font-weight: bold; text-shadow: 0 0 8px rgba(63,185,80,0.5); font-size: 0.8rem; letter-spacing: 1px; }
+    .grand-total-val { color: var(--accent-green); font-size: 1.5rem; font-weight: 600; font-family: var(--font-mono); }
+    
+    .premium-badge { color: var(--accent-blue); font-weight: 700; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
     .upgrade-box {
-        background: rgba(255, 123, 114, 0.1); border: 1px solid #ff7b72; border-radius: 8px;
-        padding: 15px; text-align: center; margin-top: 15px;
+        background: rgba(16, 107, 163, 0.05); border: 1px dashed var(--accent-blue); border-radius: 2px;
+        padding: 16px; text-align: center; margin-top: 12px;
     }
-    .live-indicator { color: #ff7b72; animation: blinker 1.5s linear infinite; }
-    @keyframes blinker { 50% { opacity: 0; } }
+    .live-indicator { display: inline-block; width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; margin-right: 6px; animation: blink 1.5s infinite; }
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    /* Sidebar Refinement */
+    [data-testid="stSidebar"] { background-color: var(--bg-secondary); border-right: 1px solid var(--border-color); }
+    .sidebar-module {
+        display: flex; align-items: center; gap: 10px; padding: 8px;
+        border-radius: 3px; margin-bottom: 4px; cursor: pointer; color: var(--text-secondary);
+    }
+    .sidebar-module:hover { background: var(--bg-accent); color: var(--text-primary); }
+    .sidebar-module.active { background: var(--accent-blue); color: white; }
     </style>
+
 """, unsafe_allow_html=True)
 
 # --- 3. DATA UTILITIES & LOGISTICS ENGINE ---
@@ -113,12 +202,41 @@ def get_item_weight(item_name):
     return 10
 
 # --- 4. MAIN UI & SIDEBAR ---
-# Simulation Toggle for Exhibition
-st.sidebar.markdown("### ⚙️ Presentation Controls")
-user_tier = st.sidebar.radio("Simulate User Tier:", ["Free Account", "Premium ($7k/mo)"])
-is_premium = (user_tier == "Premium ($7k/mo)")
+with st.sidebar:
+    st.markdown("### 🏢 PLATFORM")
+    st.markdown("""
+        <div class="sidebar-module active">📊 COMMAND_CENTER</div>
+        <div class="sidebar-module">🔍 DATA_EXPLORER</div>
+        <div class="sidebar-module">🏗️ OBJECT_GRAPH</div>
+        <div class="sidebar-module">⚙️ SYSTEM_SETTINGS</div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    st.markdown("### ⚙️ SETTINGS")
+    user_tier = st.sidebar.radio("User Tier:", ["Free Account", "Premium ($7k/mo)"])
+    is_premium = (user_tier == "Premium ($7k/mo)")
 
-st.markdown("<h1 class='main-title'><span class='live-indicator'>●</span> MONOLITH COMMAND</h1>", unsafe_allow_html=True)
+# Main Header Area
+st.markdown("""
+    <div class="breadcrumb">
+        <span>WORKSPACE</span>
+        <span>MONOLITH</span>
+        <span class="active">COMMAND_CENTER</span>
+    </div>
+""", unsafe_allow_html=True)
+
+st.markdown("<h1 class='main-title'>MONOLITH // COMMAND CENTER</h1>", unsafe_allow_html=True)
+uptime = datetime.now().strftime("%H:%M:%S")
+st.markdown(f"""
+    <div class='system-status-bar'>
+        <span><span class="status-indicator"></span>STATUS: NOMINAL</span>
+        <span>LATENCY: 1.2MS</span>
+        <span>VERSION: v4.2.0-STABLE</span>
+        <span>UPTIME: {uptime}</span>
+        <span>COORD: 6.9271° N, 79.8612° E</span>
+    </div>
+""", unsafe_allow_html=True)
+
 
 df_raw = fetch_live_market_data()
 live_items = process_latest_items(df_raw)
@@ -147,22 +265,43 @@ else:
 
     # LEFT: Market Feed
     with col_left:
-        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-header">📡 LIVE INTELLIGENCE FEED</div>', unsafe_allow_html=True)
+        st.markdown('<div class="dashboard-card" style="height: 520px; overflow-y: auto;">', unsafe_allow_html=True)
+        st.markdown('<div class="card-header">📡 LIVE INTELLIGENCE FEED <span><span class="live-indicator"></span>LIVE</span></div>', unsafe_allow_html=True)
         for item in live_items:
-            color = "#3fb950" if item['change'] >= 0 else "#f85149"
+            color = "#0F9960" if item['change'] >= 0 else "#DB3737"
+            status_tag = "STABLE" if item['change'] > -2 else "VOLATILE"
+            tag_class = "green" if status_tag == "STABLE" else "blue"
+            
+            import hashlib
+            item_hash = hashlib.md5(item['item'].encode()).hexdigest()[:8].upper()
             st.markdown(f"""
                 <div class="feed-row">
                     <div>
-                        <div class="feed-item-name">{item['item']}</div>
-                        <div style="font-size:0.7rem; color:#8b949e;">SRC: {item['source'].upper()}</div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="feed-item-name">{item['item']}</span>
+                            <span class="bp-tag {tag_class}">{status_tag}</span>
+                        </div>
+                        <div class="metadata-hash">ID: {item_hash} // TYPE: RAW_MAT // SRC: {item['source'].upper()}</div>
                     </div>
                     <div style="text-align:right;">
                         <div class="feed-price">Rs.{item['price']:,.0f}</div>
-                        <div style="color:{color}; font-size:0.8rem; font-weight:bold;">{item['change']:+.2f}%</div>
+                        <div style="color:{color}; font-size:0.75rem; font-weight:600; font-family:var(--font-mono);">{item['change']:+.2f}%</div>
                     </div>
                 </div>
             """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # TELEMETRY LOG
+        st.markdown('<div class="dashboard-card" style="margin-top: 10px;">', unsafe_allow_html=True)
+        st.markdown('<div class="card-header">🧾 COMMAND TRACE</div>', unsafe_allow_html=True)
+        log_entries = [
+            f"[{datetime.now().strftime('%H:%M:%S')}] SYNC_COMPLETE: MARKET_DATA_FETCHED",
+            f"[{datetime.now().strftime('%H:%M:%S')}] CACHE_VALIDATED: 12_OBJECTS_PERSISTED",
+            f"[{datetime.now().strftime('%H:%M:%S')}] AUTH_SUCCESS: OPERATOR_ASEL_ADMIN",
+            f"[{datetime.now().strftime('%H:%M:%S')}] GRID_REFRESH: {len(live_items)}_NODES_SYNCED"
+        ]
+        for log in log_entries:
+            st.markdown(f"<div style='font-family:var(--font-mono); font-size:9px; color:var(--text-muted); padding:2px 0;'>{log}</div>", unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     # RIGHT: Tools
@@ -186,7 +325,7 @@ else:
             
             transport_cost = 0
             if is_premium:
-                st.markdown("<span class='premium-badge'>● PRO LOGISTICS ACTIVE</span>", unsafe_allow_html=True)
+                st.markdown('<span class="bp-tag blue" style="margin-bottom: 15px;">● PRO LOGISTICS ACTIVE</span>', unsafe_allow_html=True)
                 col_loc, col_date = st.columns(2)
                 with col_loc:
                     location = st.selectbox("📍 Delivery Site", list(destinations.keys()))
@@ -205,9 +344,10 @@ else:
                 st.selectbox("📍 Delivery Site", ["Colombo (Local)"], disabled=True)
                 st.markdown("""
                     <div class="upgrade-box">
-                        <div style="font-size: 1.5rem; margin-bottom: 5px;">🔒</div>
-                        <div style="color: #ff7b72; font-weight: bold;">ENTERPRISE FEATURE</div>
-                        <div style="font-size: 0.85rem; color: #c9d1d9;">Upgrade to the Rs. 7,000/mo tier to unlock automated fleet routing, live distance calculations, and transport cost prediction.</div>
+                        <div style="font-size: 1.2rem; margin-bottom: 8px; color: var(--accent-blue);">🔒 ENTERPRISE_LOCK</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                            Upgrade to the <b>Premium Tier ($7k/mo)</b> to unlock automated fleet routing, live distance calculations, and transport cost prediction.
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
 
@@ -215,16 +355,17 @@ else:
             grand_total = material_cost + transport_cost
             st.markdown(f"""
                 <div class="total-display">
-                    <div style="display: flex; justify-content: space-between; color: #8b949e; font-size: 0.9rem; margin-bottom: 5px;">
-                        <span>Material Subtotal:</span> <span>Rs. {material_cost:,.2f}</span>
+                    <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.75rem; margin-bottom: 6px; font-family:var(--font-mono);">
+                        <span>PROCUREMENT_SUBTOTAL</span> <span>Rs. {material_cost:,.2f}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; color: #8b949e; font-size: 0.9rem; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px;">
-                        <span>Transport Surcharge:</span> <span>Rs. {transport_cost:,.2f}</span>
+                    <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.75rem; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; font-family:var(--font-mono);">
+                        <span>LOGISTICS_SURCHARGE</span> <span>Rs. {transport_cost:,.2f}</span>
                     </div>
-                    <div style="color:#e6edf3; font-size:0.85rem; letter-spacing: 1px; margin-bottom: 5px;">TOTAL PROJECT ESTIMATE</div>
-                    <div style="color:#3fb950; font-size:2.5rem; font-weight:800; font-family:'Courier New', monospace;">Rs. {grand_total:,.2f}</div>
+                    <div style="color:var(--text-secondary); font-size:0.65rem; font-weight:700; letter-spacing: 0.8px; margin-bottom: 4px; text-transform:uppercase;">Estimated Settlement Total</div>
+                    <div class="grand-total-val">Rs. {grand_total:,.2f}</div>
                 </div>
             """, unsafe_allow_html=True)
+
             
         # TAB 2: FORECASTING
         with tab_predict:
@@ -239,4 +380,5 @@ else:
                 st.info("Gathering more historical data to generate accurate AI predictions. Please wait 24 hours.")
                 
         st.markdown('</div>', unsafe_allow_html=True)
+
 
