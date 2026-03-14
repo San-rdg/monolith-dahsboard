@@ -5,3 +5,4 @@ streamlit-autorefresh
 beautifulsoup4
 requests
 cloudscraper
+plotly
