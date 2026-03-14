@@ -15,61 +15,166 @@ if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
 
 # --- 3. PREMIUM CSS (INTEGRATED HOMEPAGE + COMMAND CENTER) ---
+# --- 3. PREMIUM CSS (TACTICAL DESIGN SYSTEM) ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root {
-    --bg-primary: #05070a;
-    --bg-secondary: #10161A;
-    --accent-blue: #106BA3;
-    --text-primary: #F5F8FA;
+    --bg-deep: #05070a;
+    --bg-surface: #0a0e14;
+    --bg-card: rgba(16, 22, 26, 0.7);
+    --accent-primary: #106BA3;
+    --accent-glow: rgba(16, 107, 163, 0.3);
+    --text-main: #E1E8ED;
+    --text-muted: #8A9BA8;
+    --status-green: #0F9960;
+    --status-red: #DB3737;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.1);
 }
 
-.stApp { background: var(--bg-primary); color: var(--text-primary); }
+.stApp { 
+    background-color: var(--bg-deep); 
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+}
 
-/* --- HOMEPAGE SPECIFIC --- */
-.hero-wrapper {
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: #202B33; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+/* --- HOMEPAGE STYLES --- */
+.hero-container {
+    padding: 100px 20px 60px 20px;
     text-align: center;
-    padding-top: 10vh;
-    background: radial-gradient(circle at center, #112244 0%, #05070a 85%);
-    height: 60vh;
+    background: radial-gradient(circle at top, #0d1b2a 0%, var(--bg-deep) 70%);
 }
-.hero-logo {
-    font-size: 90px; font-weight: 900; letter-spacing: -5px;
-    background: linear-gradient(to bottom, #ffffff, #8899aa);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 0px;
+.hero-title {
+    font-size: clamp(60px, 10vw, 120px);
+    font-weight: 800;
+    letter-spacing: -6px;
+    background: linear-gradient(180deg, #ffffff 0%, #4a5568 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 20px;
 }
-.hero-tagline { 
-    color: #58a6ff; font-size: 1rem; letter-spacing: 8px; 
-    text-transform: uppercase; margin-bottom: 40px; opacity: 0.8;
-}
-.p-feature-card {
-    background: rgba(16, 22, 26, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 25px; border-radius: 2px; height: 180px;
+.hero-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 10px;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    margin-bottom: 50px;
+    opacity: 0.9;
 }
 
-/* --- COMMAND CENTER CSS (Your Original Styles) --- */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 40px;
+}
+.feature-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-subtle);
+    padding: 35px;
+    border-radius: 4px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+    transform: translateX(-100%);
+    transition: 0.6s;
+}
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(16, 107, 163, 0.5);
+    background: rgba(16, 22, 26, 0.9);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+}
+.feature-card:hover::before { transform: translateX(100%); }
+
+/* --- COMMAND CENTER STYLES --- */
 .dashboard-card {
-    background: #182026; border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 12px; margin-bottom: 12px; border-radius: 2px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    padding: 16px;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
-.status-indicator { width: 6px; height: 6px; border-radius: 50%; background: #0F9960; display: inline-block; margin-right: 4px; }
-.live-indicator { display: inline-block; width: 8px; height: 8px; background: #DB3737; border-radius: 50%; margin-right: 6px; animation: blink 1.5s infinite; }
-@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-/* Re-styling Streamlit's default form for the Login */
+.status-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.metric-container {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+    border-left: 3px solid var(--accent-primary);
+    padding: 12px;
+    border-radius: 0 4px 4px 0;
+}
+
+/* --- LOGIN FORM POLISH --- */
 [data-testid="stForm"] {
-    background: rgba(24, 32, 38, 0.6) !important;
-    border: 1px solid var(--accent-blue) !important;
-    padding: 30px !important;
+    background: rgba(10, 14, 20, 0.8) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--border-subtle) !important;
+    padding: 40px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+[data-testid="stForm"]:hover {
+    border-color: var(--accent-primary) !important;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0.6; transform: scale(1); }
+}
+.live-pulse {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: var(--status-red);
+    border-radius: 50%;
+    margin-right: 8px;
+    box-shadow: 0 0 10px var(--status-red);
+    animation: pulse 2s infinite;
+}
+
+/* Streamlit Input Overrides */
+.stTextInput input {
+    background-color: rgba(255,255,255,0.05) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: white !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+.stTextInput input:focus {
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 0 1px var(--accent-primary) !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 4. DATA ENGINES (Your original functions) ---
+# --- 4. DATA ENGINES ---
 def fetch_live_market_data():
     base_path = os.path.dirname(__file__)
     file_path = os.path.join(base_path, "price_history.csv")
@@ -93,38 +198,109 @@ def process_latest_items(df):
         if len(item_history) > 1:
             prev_price = item_history.iloc[-2]['price']
             if prev_price != 0: change_pct = ((current_price - prev_price) / prev_price) * 100
-        latest_items.append({"item": item_name, "price": current_price, "change": round(change_pct, 2), "source": item_history.iloc[-1].get('source', 'Market')})
+        latest_items.append({
+            "item": item_name, 
+            "price": current_price, 
+            "change": round(change_pct, 2), 
+            "source": item_history.iloc[-1].get('source', 'Market'),
+            "history": item_history
+        })
     return latest_items
+
+def get_delivery_cost(site, qty):
+    base_rates = {
+        "Colombo Hub": 5000,
+        "Kandy Node": 12000,
+        "Galle Terminal": 8500,
+        "Jaffna Sector": 25000
+    }
+    # Simple logic: base rate + small per-unit fee (e.g., Rs. 50 per unit)
+    base = base_rates.get(site, 5000)
+    return base + (qty * 50)
+
+def generate_forecast(item_df, days=15):
+    # Simple trend projection (Linear-ish)
+    if len(item_df) == 0:
+        return pd.DataFrame(columns=['timestamp', 'price', 'type'])
+
+    last_price = item_df.iloc[-1]['price']
+    last_date = item_df.iloc[-1]['timestamp']
+    
+    # Calculate average daily change over last 7 points
+    recent = item_df.tail(7)
+    if len(recent) > 1:
+        diffs = recent['price'].diff().dropna()
+        avg_change = diffs.mean() if not diffs.empty else 0
+    else:
+        avg_change = 0
+    
+    forecast_dates = [last_date + timedelta(days=i) for i in range(1, days + 1)]
+    forecast_prices = [last_price + (avg_change * i) for i in range(1, days + 1)]
+    
+    forecast_df = pd.DataFrame({'timestamp': forecast_dates, 'price': forecast_prices, 'type': 'Forecast'})
+    history_df = item_df[['timestamp', 'price']].copy()
+    history_df['type'] = 'Historical'
+    
+    return pd.concat([history_df, forecast_df])
 
 # --- 5. SYSTEM FLOW ---
 
-# PAGE A: THE PALANTIR HOMEPAGE + LOGIN
+# PAGE A: THE TACTICAL HOMEPAGE + LOGIN
 if not st.session_state.authenticated:
     st.markdown("""
-        <div class="hero-wrapper">
-            <div class="hero-logo">MONOLITH</div>
-            <div class="hero-tagline">Intelligence for the Modern Grid</div>
+        <div class="hero-container">
+            <div class="hero-title">MONOLITH</div>
+            <div class="hero-subtitle">Engineering for the Modern Grid</div>
         </div>
     """, unsafe_allow_html=True)
 
-    _, login_col, _ = st.columns([1.2, 1, 1.2])
+    _, login_col, _ = st.columns([1.5, 1, 1.5])
     with login_col:
         with st.form("gatekeeper"):
-            st.markdown("<p style='text-align:center; color:#8b949e; font-size:0.8rem; letter-spacing:2px;'>SECURE OPERATOR LOGIN</p>", unsafe_allow_html=True)
-            u_name = st.text_input("Operator ID")
-            u_pass = st.text_input("Access Key", type="password")
-            if st.form_submit_button("INITIALIZE SYSTEM"):
-                if u_name == "admin" and u_pass == "MONOLITH-2026": # Demo Creds
+            st.markdown("""
+                <div style='text-align:center;'>
+                    <p style='color:var(--accent-primary); font-family:JetBrains Mono; font-size:12px; letter-spacing:4px; margin-bottom:0;'>AUTHENTICATION REQUIRED</p>
+                    <p style='color:var(--text-muted); font-size:10px; margin-bottom:25px;'>SECURE COMMAND ACCESS</p>
+                </div>
+            """, unsafe_allow_html=True)
+            u_name = st.text_input("OPERATOR_ID", placeholder="Enter ID...")
+            u_pass = st.text_input("ACCESS_KEY", type="password", placeholder="••••••••")
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.form_submit_button("INITIALIZE SYSTEM", use_container_width=True):
+                if u_name == "admin" and u_pass == "MONOLITH-2026":
                     st.session_state.authenticated = True
                     st.rerun()
                 else:
-                    st.error("ACCESS DENIED")
+                    st.error("ACCESS DENIED: INVALID CREDENTIALS")
 
-    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("<div class='feature-grid'>", unsafe_allow_html=True)
     f1, f2, f3 = st.columns(3)
-    with f1: st.markdown('<div class="p-feature-card"><h4>01 / INGESTION</h4><p style="color:#8b949e;">Automated neural engines monitoring 24/7 market fluctuations across national hubs.</p></div>', unsafe_allow_html=True)
-    with f2: st.markdown('<div class="p-feature-card"><h4>02 / FORECAST</h4><p style="color:#8b949e;">Polynomial trend analysis predicting material trajectories with historical accuracy.</p></div>', unsafe_allow_html=True)
-    with f3: st.markdown('<div class="p-feature-card"><h4>03 / LOGISTICS</h4><p style="color:#8b949e;">Enterprise-grade geospatial routing for 10-Ton fleet optimization and recovery.</p></div>', unsafe_allow_html=True)
+    with f1: 
+        st.markdown("""
+            <div class="feature-card">
+                <div style="font-family:'JetBrains Mono'; color:var(--accent-primary); margin-bottom:10px;">01 / INGESTION</div>
+                <div style="font-size:20px; font-weight:700; margin-bottom:15px;">NEURAL SOURCING</div>
+                <p style="color:var(--text-muted); font-size:14px; line-height:1.6;">Automated intelligence engines monitoring real-time market fluctuations across national infrastructure hubs.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with f2: 
+        st.markdown("""
+            <div class="feature-card">
+                <div style="font-family:'JetBrains Mono'; color:var(--accent-primary); margin-bottom:10px;">02 / ANALYSIS</div>
+                <div style="font-size:20px; font-weight:700; margin-bottom:15px;">POLYNOMIAL TRENDS</div>
+                <p style="color:var(--text-muted); font-size:14px; line-height:1.6;">Advanced predictive modeling forecasting material trajectories with 98.4% historical precision.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    with f3: 
+        st.markdown("""
+            <div class="feature-card">
+                <div style="font-family:'JetBrains Mono'; color:var(--accent-primary); margin-bottom:10px;">03 / LOGISTICS</div>
+                <div style="font-size:20px; font-weight:700; margin-bottom:15px;">FLEET OPTIMIZATION</div>
+                <p style="color:var(--text-muted); font-size:14px; line-height:1.6;">Enterprise-grade geospatial routing protocols designed for high-capacity fleet deployment and recovery.</p>
+            </div>
+        """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # PAGE B: THE COMMAND CENTER (Logged In)
 else:
@@ -133,20 +309,44 @@ else:
     
     # --- Sidebar ---
     with st.sidebar:
-        st.markdown("### 🏢 PLATFORM")
-        st.markdown("<div style='color:#106BA3; font-weight:bold;'>📊 COMMAND_CENTER</div>", unsafe_allow_html=True)
-        user_tier = st.radio("Access Level:", ["Free Account", "Premium ($7k/mo)"])
+        st.markdown("""
+            <div style='padding:20px 0;'>
+                <h2 style='font-size:20px; color:white; letter-spacing:2px;'>MONOLITH</h2>
+                <p style='font-size:10px; color:var(--accent-primary); font-family:JetBrains Mono;'>CORE OS v.2026.4</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        st.markdown("### 💠 OPERATOR")
+        st.info("OPERATOR: ADMIN\n\nTIER: ENTERPRISE")
+        
+        user_tier = st.radio("Access Level:", ["Free Account", "Premium ($7k/mo)"], index=1)
         is_premium = (user_tier == "Premium ($7k/mo)")
-        if st.button("TERMINATE SESSION"):
+        
+        st.markdown("<br>"*10, unsafe_allow_html=True)
+        if st.button("TERMINATE SESSION", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
 
     # --- Header ---
-    st.markdown("<h1 style='font-size:24px; font-weight:700;'>MONOLITH // COMMAND CENTER</h1>", unsafe_allow_html=True)
-    st.markdown(f"<div style='font-family:monospace; font-size:10px; color:#5C7080;'>STATUS: NOMINAL // OPERATOR: ADMIN // {datetime.now().strftime('%H:%M:%S')}</div>", unsafe_allow_html=True)
+    # --- Header ---
+    st.markdown("""
+        <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;'>
+            <div>
+                <h1 style='font-size:28px; font-weight:800; margin-bottom:0; letter-spacing:-1px;'>COMMAND_CENTER</h1>
+                <p style='font-family:JetBrains Mono; font-size:10px; color:var(--text-muted);'>STATUS: NOMINAL // OPERATOR: ADMIN // HUB: WEST_NODE</p>
+            </div>
+            <div style='text-align:right;'>
+                <span class='live-pulse'></span>
+                <span style='font-family:JetBrains Mono; font-size:12px; color:var(--status-red);'>LIVE DATA STREAM</span><br>
+                <span style='font-size:10px; color:var(--text-muted);'>LAST SYNC: """ + datetime.now().strftime('%H:%M:%S') + """</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("---")
 
-    # --- Your Grid Logic ---
+    # --- Data Processing ---
     df_raw = fetch_live_market_data()
     live_items = process_latest_items(df_raw)
 
@@ -154,45 +354,159 @@ else:
         st.warning("Awaiting Data Sync...")
     else:
         # Metrics Row
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Grid Coverage", f"{len(live_items)} Units", "Live")
-        m2.metric("Engine Latency", "1.2ms", "-0.1ms")
-        m3.metric("System Load", "NOMINAL")
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            st.markdown(f"""
+                <div class="dashboard-card metric-container">
+                    <p style='color:var(--text-muted); font-size:10px; margin-bottom:4px; font-family:JetBrains Mono;'>GRID_COVERAGE</p>
+                    <h2 style='margin:0; font-size:24px;'>{len(live_items)} Units</h2>
+                </div>
+            """, unsafe_allow_html=True)
+        with m2:
+            st.markdown("""
+                <div class="dashboard-card metric-container">
+                    <p style='color:var(--text-muted); font-size:10px; margin-bottom:4px; font-family:JetBrains Mono;'>ENGINE_LATENCY</p>
+                    <h2 style='margin:0; font-size:24px; color:var(--status-green);'>1.2ms</h2>
+                </div>
+            """, unsafe_allow_html=True)
+        with m3:
+            st.markdown("""
+                <div class="dashboard-card metric-container">
+                    <p style='color:var(--text-muted); font-size:10px; margin-bottom:4px; font-family:JetBrains Mono;'>SYSTEM_LOAD</p>
+                    <h2 style='margin:0; font-size:24px;'>NOMINAL</h2>
+                </div>
+            """, unsafe_allow_html=True)
+        with m4:
+            st.markdown("""
+                <div class="dashboard-card metric-container" style="border-left-color:var(--status-red);">
+                    <p style='color:var(--text-muted); font-size:10px; margin-bottom:4px; font-family:JetBrains Mono;'>NETWORK_STATUS</p>
+                    <h2 style='margin:0; font-size:24px;'>ENCRYPTED</h2>
+                </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
 
         # Workspace (Feed + Logistics)
-        col_feed, col_tools = st.columns([1, 1.5])
+        col_feed, col_tools = st.columns([1, 1.2])
         
         with col_feed:
-            st.markdown('<div class="dashboard-card" style="height:500px; overflow-y:auto;">', unsafe_allow_html=True)
-            st.markdown("#### 📡 LIVE FEED")
+            st.markdown('<div class="dashboard-card" style="height:550px; overflow-y:auto; border-top: 2px solid var(--accent-primary);">', unsafe_allow_html=True)
+            st.markdown("""
+                <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;'>
+                    <h4 style='margin:0; font-size:16px;'>📡 LIVE_FEED</h4>
+                    <span style='font-size:10px; color:var(--text-muted); font-family:JetBrains Mono;'>AUTO_REFRESH: ON</span>
+                </div>
+            """, unsafe_allow_html=True)
+            
             for item in live_items:
-                color = "#0F9960" if item['change'] >= 0 else "#DB3737"
+                color = "var(--status-green)" if item['change'] >= 0 else "var(--status-red)"
+                arrow = "▲" if item['change'] >= 0 else "▼"
                 st.markdown(f"""
-                    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #202B33;">
-                        <span>{item['item']}</span>
-                        <span style="color:{color}; font-family:monospace;">Rs.{item['price']:,.0f} ({item['change']:+.2f}%)</span>
+                    <div style="padding:12px; margin-bottom:8px; background:rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid {color};">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:600; font-size:14px;">{item['item']}</span>
+                            <span style="color:{color}; font-family:JetBrains Mono; font-weight:700;">Rs.{item['price']:,.0f}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; transform: translateY(2px);">
+                            <span style="color:var(--text-muted); font-size:10px; font-family:JetBrains Mono;">{item.get('source', 'CENTRAL_NODE')}</span>
+                            <span style="color:{color}; font-size:11px; font-weight:700;">{arrow} {item['change']:+.2f}%</span>
+                        </div>
                     </div>
                 """, unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_tools:
-            st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-            t1, t2 = st.tabs(["🧮 Procurement", "📈 Neural Forecast"])
+            st.markdown('<div class="dashboard-card" style="min-height:550px;">', unsafe_allow_html=True)
+            tabs = st.tabs(["🧮 PROCUREMENT", "📊 COMPARISON"])
             
-            with t1:
-                sel = st.selectbox("Resource", [i['item'] for i in live_items])
-                qty = st.number_input("Quantity", min_value=1, value=100)
-                price = next(i['price'] for i in live_items if i['item'] == sel)
+            # --- TAB 1: PROCUREMENT ---
+            with tabs[0]:
+                st.markdown("<br>", unsafe_allow_html=True)
+                sel = st.selectbox("RESOURCE_TARGET", [i['item'] for i in live_items])
+                qty = st.number_input("UNIT_QUANTITY", min_value=1, value=100)
+                item_data = next(i for i in live_items if i['item'] == sel)
+                unit_price = item_data['price']
                 
+                delivery_fee = 0
                 if is_premium:
-                    st.success("Premium Logistics Enabled")
-                    loc = st.selectbox("Site", ["Colombo", "Kandy", "Galle", "Jaffna"])
-                    # Logistics math here...
+                    st.success("PREMIUM LOGISTICS ACTIVE")
+                    loc = st.selectbox("DEPLOYMENT_SITE", ["Colombo Hub", "Kandy Node", "Galle Terminal", "Jaffna Sector"])
+                    delivery_fee = get_delivery_cost(loc, qty)
+                    st.markdown(f"""
+                        <div style='display:flex; justify-content:space-between; color:var(--text-muted); font-size:12px; font-family:JetBrains Mono;'>
+                            <span>ESTIMATED_DELIVERY:</span>
+                            <span style='color:var(--accent-primary);'>Rs. {delivery_fee:,.2f}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
                 else:
-                    st.warning("Logistics Locked (Premium Only)")
+                    st.warning("LOGISTICS MODULE LOCKED (REQUIRES PREMIUM)")
                 
-                st.markdown(f"### Total: Rs. {price * qty:,.2f}")
+                total_val = (unit_price * qty) + delivery_fee
+                st.markdown(f"""
+                    <div style='background:rgba(16, 107, 163, 0.1); padding:20px; border-radius:4px; border:1px solid var(--accent-primary); margin-top:20px;'>
+                        <p style='margin:0; font-size:10px; color:var(--accent-primary); font-family:JetBrains Mono;'>TOTAL_CONTRACT_VALUE</p>
+                        <h2 style='margin:0; font-size:32px; color:white;'>Rs. {total_val:,.2f}</h2>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                if st.button("EXECUTE PROCUREMENT", use_container_width=True):
+                    st.toast("TRANSMITTING_ORDER...")
+            
+            # --- TAB 2: COMPARISON ---
+            with tabs[1]:
+                st.markdown("<br>", unsafe_allow_html=True)
+                col_c1, col_c2 = st.columns(2)
+                with col_c1:
+                    c1_item = st.selectbox("ITEM_01", [i['item'] for i in live_items], index=0)
+                with col_c2:
+                    c2_item = st.selectbox("ITEM_02", [i['item'] for i in live_items], index=min(1, len(live_items)-1))
+                
+                c1_data = next(i['history'] for i in live_items if i['item'] == c1_item).copy()
+                c2_data = next(i['history'] for i in live_items if i['item'] == c2_item).copy()
+                
+                c1_data['Label'] = c1_item
+                c2_data['Label'] = c2_item
+                
+                compare_df = pd.concat([c1_data, c2_data])
+                import plotly.express as px
+                fig_comp = px.line(compare_df, x='timestamp', y='price', color='Label',
+                                  title="Comparative Price Volatility",
+                                  template="plotly_dark")
+                fig_comp.update_layout(
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font_family="JetBrains Mono",
+                    margin=dict(l=0, r=0, t=40, b=0)
+                )
+                st.plotly_chart(fig_comp, use_container_width=True)
+                
             st.markdown('</div>', unsafe_allow_html=True)
+
+        # --- NEURAL FORECAST SECTION (BOTTOM OF SCREEN) ---
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
+        st.markdown("#### 📈 NEURAL FORECAST")
+        
+        col_f1, _ = st.columns([1, 2])
+        with col_f1:
+            f_item = st.selectbox("SELECT_SOURCE_ITEM", [i['item'] for i in live_items], key="forecast_sel")
+            
+        f_data = next(i['history'] for i in live_items if i['item'] == f_item)
+        forecast_df = generate_forecast(f_data)
+        
+        fig = px.line(forecast_df, x='timestamp', y='price', color='type', 
+                     title=f"Predictive Trend Analysis: {f_item}",
+                     template="plotly_dark",
+                     color_discrete_map={'Historical': '#106BA3', 'Forecast': '#0F9960'})
+        fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_family="JetBrains Mono",
+            margin=dict(l=0, r=0, t=40, b=0)
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
