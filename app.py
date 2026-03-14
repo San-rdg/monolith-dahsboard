@@ -420,68 +420,66 @@ else:
             
             # --- TAB 1: PROCUREMENT ---
             with tabs[0]:
-                st.markdown('<div class="dashboard-card" style="min-height:550px;">', unsafe_allow_html=True)
-                st.markdown("<br>", unsafe_allow_html=True)
-                sel = st.selectbox("RESOURCE_TARGET", [i['item'] for i in live_items])
-                qty = st.number_input("UNIT_QUANTITY", min_value=1, value=100)
-                item_data = next(i for i in live_items if i['item'] == sel)
-                unit_price = item_data['price']
-                
-                delivery_fee = 0
-                if is_premium:
-                    st.success("PREMIUM LOGISTICS ACTIVE")
-                    loc = st.selectbox("DEPLOYMENT_SITE", ["Colombo Hub", "Kandy Node", "Galle Terminal", "Jaffna Sector"])
-                    delivery_fee = get_delivery_cost(loc, qty)
+                with st.container(border=True):
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    sel = st.selectbox("RESOURCE_TARGET", [i['item'] for i in live_items])
+                    qty = st.number_input("UNIT_QUANTITY", min_value=1, value=100)
+                    item_data = next(i for i in live_items if i['item'] == sel)
+                    unit_price = item_data['price']
+                    
+                    delivery_fee = 0
+                    if is_premium:
+                        st.success("PREMIUM LOGISTICS ACTIVE")
+                        loc = st.selectbox("DEPLOYMENT_SITE", ["Colombo Hub", "Kandy Node", "Galle Terminal", "Jaffna Sector"])
+                        delivery_fee = get_delivery_cost(loc, qty)
+                        st.markdown(f"""
+                            <div style='display:flex; justify-content:space-between; color:var(--text-muted); font-size:12px; font-family:JetBrains Mono;'>
+                                <span>ESTIMATED_DELIVERY:</span>
+                                <span style='color:var(--accent-primary);'>Rs. {delivery_fee:,.2f}</span>
+                            </div>
+                        """, unsafe_allow_html=True)
+                    else:
+                        st.warning("LOGISTICS MODULE LOCKED (REQUIRES PREMIUM)")
+                    
+                    total_val = (unit_price * qty) + delivery_fee
                     st.markdown(f"""
-                        <div style='display:flex; justify-content:space-between; color:var(--text-muted); font-size:12px; font-family:JetBrains Mono;'>
-                            <span>ESTIMATED_DELIVERY:</span>
-                            <span style='color:var(--accent-primary);'>Rs. {delivery_fee:,.2f}</span>
+                        <div style='background:rgba(16, 107, 163, 0.1); padding:20px; border-radius:4px; border:1px solid var(--accent-primary); margin-top:20px;'>
+                            <p style='margin:0; font-size:10px; color:var(--accent-primary); font-family:JetBrains Mono;'>TOTAL_CONTRACT_VALUE</p>
+                            <h2 style='margin:0; font-size:32px; color:white;'>Rs. {total_val:,.2f}</h2>
                         </div>
                     """, unsafe_allow_html=True)
-                else:
-                    st.warning("LOGISTICS MODULE LOCKED (REQUIRES PREMIUM)")
-                
-                total_val = (unit_price * qty) + delivery_fee
-                st.markdown(f"""
-                    <div style='background:rgba(16, 107, 163, 0.1); padding:20px; border-radius:4px; border:1px solid var(--accent-primary); margin-top:20px;'>
-                        <p style='margin:0; font-size:10px; color:var(--accent-primary); font-family:JetBrains Mono;'>TOTAL_CONTRACT_VALUE</p>
-                        <h2 style='margin:0; font-size:32px; color:white;'>Rs. {total_val:,.2f}</h2>
-                    </div>
-                """, unsafe_allow_html=True)
-                
-                if st.button("EXECUTE PROCUREMENT", use_container_width=True):
-                    st.toast("TRANSMITTING_ORDER...")
-                st.markdown('</div>', unsafe_allow_html=True)
+                    
+                    if st.button("EXECUTE PROCUREMENT", use_container_width=True):
+                        st.toast("TRANSMITTING_ORDER...")
             
             # --- TAB 2: COMPARISON ---
             with tabs[1]:
-                st.markdown('<div class="dashboard-card" style="min-height:550px;">', unsafe_allow_html=True)
-                st.markdown("<br>", unsafe_allow_html=True)
-                col_c1, col_c2 = st.columns(2)
-                with col_c1:
-                    c1_item = st.selectbox("ITEM_01", [i['item'] for i in live_items], index=0)
-                with col_c2:
-                    c2_item = st.selectbox("ITEM_02", [i['item'] for i in live_items], index=min(1, len(live_items)-1))
-                
-                c1_data = next(i['history'] for i in live_items if i['item'] == c1_item).copy()
-                c2_data = next(i['history'] for i in live_items if i['item'] == c2_item).copy()
-                
-                c1_data['Label'] = c1_item
-                c2_data['Label'] = c2_item
-                
-                compare_df = pd.concat([c1_data, c2_data])
-                import plotly.express as px
-                fig_comp = px.line(compare_df, x='timestamp', y='price', color='Label',
-                                  title="Comparative Price Volatility",
-                                  template="plotly_dark")
-                fig_comp.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_family="JetBrains Mono",
-                    margin=dict(l=0, r=0, t=40, b=0)
-                )
-                st.plotly_chart(fig_comp, use_container_width=True)
-                st.markdown('</div>', unsafe_allow_html=True)
+                with st.container(border=True):
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    col_c1, col_c2 = st.columns(2)
+                    with col_c1:
+                        c1_item = st.selectbox("ITEM_01", [i['item'] for i in live_items], index=0)
+                    with col_c2:
+                        c2_item = st.selectbox("ITEM_02", [i['item'] for i in live_items], index=min(1, len(live_items)-1))
+                    
+                    c1_data = next(i['history'] for i in live_items if i['item'] == c1_item).copy()
+                    c2_data = next(i['history'] for i in live_items if i['item'] == c2_item).copy()
+                    
+                    c1_data['Label'] = c1_item
+                    c2_data['Label'] = c2_item
+                    
+                    compare_df = pd.concat([c1_data, c2_data])
+                    import plotly.express as px
+                    fig_comp = px.line(compare_df, x='timestamp', y='price', color='Label',
+                                      title="Comparative Price Volatility",
+                                      template="plotly_dark")
+                    fig_comp.update_layout(
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        font_family="JetBrains Mono",
+                        margin=dict(l=0, r=0, t=40, b=0)
+                    )
+                    st.plotly_chart(fig_comp, use_container_width=True)
 
         # --- NEURAL FORECAST SECTION (BOTTOM OF SCREEN) ---
         st.markdown("<br>", unsafe_allow_html=True)
@@ -507,6 +505,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
