@@ -416,11 +416,11 @@ else:
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_tools:
-            st.markdown('<div class="dashboard-card" style="min-height:550px;">', unsafe_allow_html=True)
             tabs = st.tabs(["🧮 PROCUREMENT", "📊 COMPARISON"])
             
             # --- TAB 1: PROCUREMENT ---
             with tabs[0]:
+                st.markdown('<div class="dashboard-card" style="min-height:550px;">', unsafe_allow_html=True)
                 st.markdown("<br>", unsafe_allow_html=True)
                 sel = st.selectbox("RESOURCE_TARGET", [i['item'] for i in live_items])
                 qty = st.number_input("UNIT_QUANTITY", min_value=1, value=100)
@@ -451,9 +451,11 @@ else:
                 
                 if st.button("EXECUTE PROCUREMENT", use_container_width=True):
                     st.toast("TRANSMITTING_ORDER...")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # --- TAB 2: COMPARISON ---
             with tabs[1]:
+                st.markdown('<div class="dashboard-card" style="min-height:550px;">', unsafe_allow_html=True)
                 st.markdown("<br>", unsafe_allow_html=True)
                 col_c1, col_c2 = st.columns(2)
                 with col_c1:
@@ -479,8 +481,7 @@ else:
                     margin=dict(l=0, r=0, t=40, b=0)
                 )
                 st.plotly_chart(fig_comp, use_container_width=True)
-                
-            st.markdown('</div>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
 
         # --- NEURAL FORECAST SECTION (BOTTOM OF SCREEN) ---
         st.markdown("<br>", unsafe_allow_html=True)
@@ -506,6 +507,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
