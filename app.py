@@ -209,12 +209,15 @@ def fetch_live_market_data():
     if os.path.exists(AUDIT_FILE):
         try:
             with open(AUDIT_FILE, 'r') as f:
-                audits = json.load(f)
-                audit_df = pd.DataFrame(audits)
-                audit_df['timestamp'] = pd.to_datetime(audit_df['timestamp'])
-                audit_df['source_type'] = 'Audited'
-                df = pd.concat([df, audit_df], ignore_index=True)
-        except: pass
+                content = f.read().strip()
+                if content:
+                    audits = json.loads(content)
+                    audit_df = pd.DataFrame(audits)
+                    audit_df['timestamp'] = pd.to_datetime(audit_df['timestamp'])
+                    audit_df['source_type'] = 'Audited'
+                    df = pd.concat([df, audit_df], ignore_index=True)
+        except Exception:
+            pass # Ignore corrupt or empty audit files
 
     if df.empty: return pd.DataFrame()
     
@@ -452,7 +455,12 @@ else:
                 # Save to manual_audits.json
                 current_audits = []
                 if os.path.exists(AUDIT_FILE):
-                    with open(AUDIT_FILE, 'r') as f: current_audits = json.load(f)
+                    try:
+                        with open(AUDIT_FILE, 'r') as f:
+                            content = f.read().strip()
+                            if content:
+                                current_audits = json.loads(content)
+                    except: pass
                 
                 current_audits.append({
                     "timestamp": datetime.now().isoformat(),
@@ -642,6 +650,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
