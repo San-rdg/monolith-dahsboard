@@ -15,6 +15,8 @@ st.set_page_config(page_title="MONOLITH | OS", page_icon="🏗️", layout="wide
 # --- 2. SESSION STATE NAVIGATION ---
 if 'authenticated' not in st.session_state:
     st.session_state.authenticated = False
+if 'role' not in st.session_state:
+    st.session_state.role = None
 
 # --- 3. PREMIUM CSS (INTEGRATED HOMEPAGE + COMMAND CENTER) ---
 # --- 3. PREMIUM CSS (TACTICAL DESIGN SYSTEM) ---
@@ -357,6 +359,11 @@ if not st.session_state.authenticated:
             if st.form_submit_button("INITIALIZE SYSTEM", use_container_width=True):
                 if u_name == "admin" and u_pass == "MONOLITH-2026":
                     st.session_state.authenticated = True
+                    st.session_state.role = "admin"
+                    st.rerun()
+                elif u_name == "visitor" and u_pass == "MONOLITH-2026":
+                    st.session_state.authenticated = True
+                    st.session_state.role = "visitor"
                     st.rerun()
                 else:
                     st.error("ACCESS DENIED: INVALID CREDENTIALS")
@@ -409,69 +416,74 @@ else:
         
         st.markdown("---")
         st.markdown("### 💠 OPERATOR")
-        st.info("OPERATOR: ADMIN\n\nTIER: ENTERPRISE")
+        st.info(f"OPERATOR: {st.session_state.role.upper()}\n\nTIER: ENTERPRISE")
         
         user_tier = st.radio("Access Level:", ["Free Account", "Premium ($7k/mo)"], index=1)
         is_premium = (user_tier == "Premium ($7k/mo)")
         
-        st.markdown("---")
-        st.markdown("### 🛡️ VALIDATION_MATRIX")
-        if live_items:
-            # Show avg truth score
-            avg_truth = sum(i['truth_score'] for i in live_items) / len(live_items)
-            is_live_active = any(i['history'].iloc[-1]['source_type'] == 'Live' for i in live_items)
-            
-            if is_live_active:
-                color = "#0F9960" # Green
-                status_text = "VERIFIED_LIVE"
-                desc = "VOUCHED BY LIVE_SCRAPER"
-            else:
-                color = "#D9822B" # Orange/Yellow
-                status_text = "HISTORICAL_ONLY"
-                desc = "LIVE_SYNC_PENDING / USING_BASELINE"
-
-            st.markdown(f"""
-                <div style='background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; border-left:3px solid {color};'>
-                    <p style='font-size:10px; color:var(--text-muted); margin:0;'>NETWORK_INTEGRITY</p>
-                    <h3 style='margin:0; color:{color};'>{avg_truth:.1f}%</h3>
-                    <p style='font-size:9px; color:var(--text-muted);'>{status_text} // {desc}</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Show specific breakdown
-            with st.expander("INTEGRITY_LOGS", expanded=False):
-                for i in live_items[:8]:
-                    st.caption(f"{i['item']}: {i['truth_score']}%")
-        else:
-            st.warning("SYSTEM_OFFLINE: Awaiting Market Data Sync...")
-            
-        st.markdown("---")
-        st.markdown("### 🛠️ COMMAND_OVERRIDE")
-        with st.expander("MANUAL_MARKET_AUDIT", expanded=False):
-            st.caption("Inject human-verified truth data.")
-            item_to_audit = st.selectbox("TARGET_MATERIAL", [i['item'] for i in live_items] if live_items else ["None"])
-            new_val = st.number_input("VERIFIED_PRICE (Rs)", value=0.0)
-            if st.button("AUDIT & VOUCH", use_container_width=True):
-                # Save to manual_audits.json
-                current_audits = []
-                if os.path.exists(AUDIT_FILE):
-                    try:
-                        with open(AUDIT_FILE, 'r') as f:
-                            content = f.read().strip()
-                            if content:
-                                current_audits = json.loads(content)
-                    except: pass
+        if st.session_state.role == "admin":
+            st.markdown("---")
+            st.markdown("### 🛡️ VALIDATION_MATRIX")
+            if live_items:
+                # Show avg truth score
+                avg_truth = sum(i['truth_score'] for i in live_items) / len(live_items)
+                is_live_active = any(i['history'].iloc[-1]['source_type'] == 'Live' for i in live_items)
                 
-                current_audits.append({
-                    "timestamp": datetime.now().isoformat(),
-                    "item": item_to_audit,
-                    "price": new_val,
-                    "source": "Human_Operator",
-                    "source_type": "Audited"
-                })
-                with open(AUDIT_FILE, 'w') as f: json.dump(current_audits, f)
-                st.success("AUDIT LOGGED: TRUTH SCORE RECALCULATING...")
-                st.rerun()
+                if is_live_active:
+                    color = "#0F9960" # Green
+                    status_text = "VERIFIED_LIVE"
+                    desc = "VOUCHED BY LIVE_SCRAPER"
+                else:
+                    color = "#D9822B" # Orange/Yellow
+                    status_text = "HISTORICAL_ONLY"
+                    desc = "LIVE_SYNC_PENDING / USING_BASELINE"
+    
+                st.markdown(f"""
+                    <div style='background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; border-left:3px solid {color};'>
+                        <p style='font-size:10px; color:var(--text-muted); margin:0;'>NETWORK_INTEGRITY</p>
+                        <h3 style='margin:0; color:{color};'>{avg_truth:.1f}%</h3>
+                        <p style='font-size:9px; color:var(--text-muted);'>{status_text} // {desc}</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Show specific breakdown
+                with st.expander("INTEGRITY_LOGS", expanded=False):
+                    for i in live_items[:8]:
+                        st.caption(f"{i['item']}: {i['truth_score']}%")
+            else:
+                st.warning("SYSTEM_OFFLINE: Awaiting Market Data Sync...")
+                
+            st.markdown("---")
+            st.markdown("### 🛠️ COMMAND_OVERRIDE")
+            with st.expander("MANUAL_MARKET_AUDIT", expanded=False):
+                st.caption("Inject human-verified truth data.")
+                item_to_audit = st.selectbox("TARGET_MATERIAL", [i['item'] for i in live_items] if live_items else ["None"])
+                new_val = st.number_input("VERIFIED_PRICE (Rs)", value=0.0)
+                if st.button("AUDIT & VOUCH", use_container_width=True):
+                    # Save to manual_audits.json
+                    current_audits = []
+                    if os.path.exists(AUDIT_FILE):
+                        try:
+                            with open(AUDIT_FILE, 'r') as f:
+                                content = f.read().strip()
+                                if content:
+                                    current_audits = json.loads(content)
+                        except: pass
+                    
+                    current_audits.append({
+                        "timestamp": datetime.now().isoformat(),
+                        "item": item_to_audit,
+                        "price": new_val,
+                        "source": "Human_Operator",
+                        "source_type": "Audited"
+                    })
+                    with open(AUDIT_FILE, 'w') as f: json.dump(current_audits, f)
+                    st.success("AUDIT LOGGED: TRUTH SCORE RECALCULATING...")
+                    st.rerun()
+        else:
+            st.markdown("---")
+            st.success("VIEWER ACCESS GRANTED")
+            st.caption("Administrative controls are locked for this session.")
 
         st.markdown("<br>"*5, unsafe_allow_html=True)
         if st.button("TERMINATE SESSION", use_container_width=True):
@@ -650,6 +662,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
