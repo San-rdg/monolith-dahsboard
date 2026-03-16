@@ -41,11 +41,12 @@ def fetch_live_prices():
     
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'max-age=0',
-        'Referer': 'https://ikman.lk/',
-        'Sec-Ch-Ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+        'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,si;q=0.7',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Referer': 'https://ikman.lk/en/ads/sri-lanka/building-materials',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest'
     }
 
     all_results = []
@@ -99,4 +100,5 @@ if __name__ == "__main__":
     print(f"Success: Retrieved {len(data)} live data points.")
     for d in data[:5]:
         print(f"- {d['item']}: Rs. {d['price']}")
+
 
