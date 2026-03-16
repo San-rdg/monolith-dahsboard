@@ -226,16 +226,20 @@ def calculate_truth_score(item_name, item_history):
     else:
         # Penalize if last data point is old
         age_hours = (datetime.now() - latest_point['timestamp']).total_seconds() / 3600
-        score += max(0, 40 - (age_hours / 2))
+        if age_hours < 24:
+            score += 35
+        else:
+            score += max(0, 20 - (age_hours / 48))
 
     # 2. Source Alignment (Max 30)
-    # If we have both Live and Historical data for this item category
     has_live = 'Live' in item_history['source_type'].values
     has_hist = 'Historical' in item_history['source_type'].values
     if has_live and has_hist:
         score += 30
-    elif has_live or has_hist:
-        score += 15
+    elif has_live:
+        score += 25
+    else:
+        score += 10
         
     # 3. Stability (Max 20)
     if len(item_history) > 3:
@@ -371,6 +375,10 @@ else:
     # Trigger refresh only when logged in
     st_autorefresh(interval=30000, key="datarefresh")
     
+    # --- Data Processing ---
+    df_raw = fetch_live_market_data()
+    live_items = process_latest_items(df_raw)
+
     # --- Sidebar ---
     with st.sidebar:
         st.markdown("""
@@ -389,31 +397,40 @@ else:
         
         st.markdown("---")
         st.markdown("### 🛡️ VALIDATION_MATRIX")
-        if 'live_items' in locals() and live_items:
+        if live_items:
             # Show avg truth score
             avg_truth = sum(i['truth_score'] for i in live_items) / len(live_items)
-            color = "#0F9960" if avg_truth > 70 else "#DB3737"
+            is_live_active = any(i['history'].iloc[-1]['source_type'] == 'Live' for i in live_items)
+            
+            if is_live_active:
+                color = "#0F9960" # Green
+                status_text = "VERIFIED_LIVE"
+                desc = "VOUCHED BY LIVE_SCRAPER"
+            else:
+                color = "#D9822B" # Orange/Yellow
+                status_text = "HISTORICAL_ONLY"
+                desc = "LIVE_SYNC_PENDING / USING_BASELINE"
+
             st.markdown(f"""
                 <div style='background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; border-left:3px solid {color};'>
                     <p style='font-size:10px; color:var(--text-muted); margin:0;'>NETWORK_INTEGRITY</p>
                     <h3 style='margin:0; color:{color};'>{avg_truth:.1f}%</h3>
-                    <p style='font-size:9px; color:var(--text-muted);'>VOUCHED BY LIVE_SCRAPER ENGINE</p>
+                    <p style='font-size:9px; color:var(--text-muted);'>{status_text} // {desc}</p>
                 </div>
             """, unsafe_allow_html=True)
             
             # Show specific breakdown
             with st.expander("INTEGRITY_LOGS", expanded=False):
-                for i in live_items[:5]:
+                for i in live_items[:8]:
                     st.caption(f"{i['item']}: {i['truth_score']}%")
         else:
-            st.caption("Awaiting sync for validation...")
-        
+            st.warning("SYSTEM_OFFLINE: Awaiting Market Data Sync...")
+            
         st.markdown("<br>"*10, unsafe_allow_html=True)
         if st.button("TERMINATE SESSION", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
 
-    # --- Header ---
     # --- Header ---
     st.markdown("""
         <div style='display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;'>
@@ -430,10 +447,6 @@ else:
     """, unsafe_allow_html=True)
     
     st.markdown("---")
-
-    # --- Data Processing ---
-    df_raw = fetch_live_market_data()
-    live_items = process_latest_items(df_raw)
 
     if not live_items:
         st.warning("Awaiting Data Sync...")
@@ -590,6 +603,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
