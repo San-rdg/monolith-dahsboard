@@ -6,6 +6,7 @@ import math
 import hashlib
 from datetime import datetime, timedelta
 from streamlit_autorefresh import st_autorefresh
+import scraper # My new live scraper module
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(page_title="MONOLITH | OS", page_icon="🏗️", layout="wide")
@@ -178,15 +179,74 @@ st.markdown("""
 def fetch_live_market_data():
     base_path = os.path.dirname(__file__)
     file_path = os.path.join(base_path, "price_history.csv")
-    if not os.path.exists(file_path): return pd.DataFrame()
+    
+    # Base dataframe
+    df = pd.DataFrame()
+    
+    # 1. Load Historical CSV
+    if os.path.exists(file_path):
+        try:
+            df = pd.read_csv(file_path)
+            df.columns = [c.strip().lower() for c in df.columns]
+            df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce', format='mixed')
+            df['source_type'] = 'Historical'
+        except: pass
+        
+    # 2. Ingest Live Scraped Data
     try:
-        df = pd.read_csv(file_path)
-        df.columns = [c.strip().lower() for c in df.columns]
-        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce', format='mixed')
-        df = df.dropna(subset=['timestamp'])
-        df['price'] = df['price'].apply(lambda x: float(str(x).replace(',', '').strip()) if pd.notnull(x) else np.nan)
-        return df.dropna(subset=['price'])
-    except: return pd.DataFrame()
+        live_data = scraper.fetch_live_prices()
+        if live_data:
+            live_df = pd.DataFrame(live_data)
+            live_df['timestamp'] = pd.to_datetime(live_df['timestamp'])
+            live_df['source_type'] = 'Live'
+            df = pd.concat([df, live_df], ignore_index=True)
+    except: pass
+
+    if df.empty: return pd.DataFrame()
+    
+    df = df.dropna(subset=['timestamp'])
+    df['price'] = df['price'].apply(lambda x: float(str(x).replace(',', '').strip()) if pd.notnull(x) else np.nan)
+    return df.dropna(subset=['price'])
+
+def calculate_truth_score(item_name, item_history):
+    """
+    Calculates a 'Truth Score' based on:
+    - Freshness (Live data vs Historical)
+    - Source alignment
+    - Statistical variance
+    """
+    if item_history.empty: return 0
+    
+    latest_point = item_history.iloc[-1]
+    score = 0
+    
+    # 1. Freshness (Max 50)
+    if latest_point['source_type'] == 'Live':
+        score += 50
+    else:
+        # Penalize if last data point is old
+        age_hours = (datetime.now() - latest_point['timestamp']).total_seconds() / 3600
+        score += max(0, 40 - (age_hours / 2))
+
+    # 2. Source Alignment (Max 30)
+    # If we have both Live and Historical data for this item category
+    has_live = 'Live' in item_history['source_type'].values
+    has_hist = 'Historical' in item_history['source_type'].values
+    if has_live and has_hist:
+        score += 30
+    elif has_live or has_hist:
+        score += 15
+        
+    # 3. Stability (Max 20)
+    if len(item_history) > 3:
+        std = item_history['price'].tail(5).std()
+        mean = item_history['price'].tail(5).mean()
+        coeff_var = std / mean if mean != 0 else 1
+        score += max(0, 20 - (coeff_var * 100))
+    else:
+        score += 10
+        
+    return min(100, int(score))
 
 def process_latest_items(df):
     if df.empty: return []
@@ -198,12 +258,16 @@ def process_latest_items(df):
         if len(item_history) > 1:
             prev_price = item_history.iloc[-2]['price']
             if prev_price != 0: change_pct = ((current_price - prev_price) / prev_price) * 100
+        
+        truth_score = calculate_truth_score(item_name, item_history)
+        
         latest_items.append({
             "item": item_name, 
             "price": current_price, 
             "change": round(change_pct, 2), 
             "source": item_history.iloc[-1].get('source', 'Market'),
-            "history": item_history
+            "history": item_history,
+            "truth_score": truth_score
         })
     return latest_items
 
@@ -322,6 +386,27 @@ else:
         
         user_tier = st.radio("Access Level:", ["Free Account", "Premium ($7k/mo)"], index=1)
         is_premium = (user_tier == "Premium ($7k/mo)")
+        
+        st.markdown("---")
+        st.markdown("### 🛡️ VALIDATION_MATRIX")
+        if 'live_items' in locals() and live_items:
+            # Show avg truth score
+            avg_truth = sum(i['truth_score'] for i in live_items) / len(live_items)
+            color = "#0F9960" if avg_truth > 70 else "#DB3737"
+            st.markdown(f"""
+                <div style='background:rgba(255,255,255,0.05); padding:10px; border-radius:4px; border-left:3px solid {color};'>
+                    <p style='font-size:10px; color:var(--text-muted); margin:0;'>NETWORK_INTEGRITY</p>
+                    <h3 style='margin:0; color:{color};'>{avg_truth:.1f}%</h3>
+                    <p style='font-size:9px; color:var(--text-muted);'>VOUCHED BY LIVE_SCRAPER ENGINE</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Show specific breakdown
+            with st.expander("INTEGRITY_LOGS", expanded=False):
+                for i in live_items[:5]:
+                    st.caption(f"{i['item']}: {i['truth_score']}%")
+        else:
+            st.caption("Awaiting sync for validation...")
         
         st.markdown("<br>"*10, unsafe_allow_html=True)
         if st.button("TERMINATE SESSION", use_container_width=True):
@@ -505,6 +590,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
