@@ -21,25 +21,26 @@ if 'role' not in st.session_state:
 
 # --- Helper for Background ---
 def get_base64(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+    try:
+        with open(bin_file, 'rb') as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    except:
+        return None
 
 bg_path = os.path.join(os.path.dirname(__file__), "monolith_tactical_bg.png")
-# If the file hasn't been moved yet, use the absolute path from brain
-if not os.path.exists(bg_path):
-    bg_path = r"C:\Users\ASEL\.gemini\antigravity\brain\1ff462bc-159b-42c0-aa71-e6ff87b3b42c\monolith_tactical_bg_1773682251354.png"
-
 bin_str = get_base64(bg_path)
 
 # --- 3. PREMIUM CSS (TACTICAL DESIGN SYSTEM) ---
+bg_style = f"background: url('data:image/png;base64,{bin_str}'); background-size: cover; background-attachment: fixed;" if bin_str else "background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #05070a 100%);"
+
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root {{
     --bg-deep: #05070a;
-    --accent-primary: #3182ce; /* Electric Blue */
+    --accent-primary: #3182ce;
     --accent-glow: rgba(49, 130, 206, 0.2);
     --text-main: #f7fafc;
     --text-muted: #a0aec0;
@@ -50,9 +51,7 @@ st.markdown(f"""
 }}
 
 .stApp {{ 
-    background: url("data:image/png;base64,{bin_str}");
-    background-size: cover;
-    background-attachment: fixed;
+    {bg_style}
     color: var(--text-main);
     font-family: 'Outfit', sans-serif;
 }}
@@ -687,6 +686,7 @@ else:
             </p>
         </div>
     """, unsafe_allow_html=True)
+
 
 
 
