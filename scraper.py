@@ -31,13 +31,29 @@ def fetch_live_prices():
                 return cache_data.get('data', [])
 
     # 2. Scrape Data
-    scraper = cloudscraper.create_scraper()
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'desktop': True
+        }
+    )
+    
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'max-age=0',
+        'Referer': 'https://ikman.lk/',
+        'Sec-Ch-Ua': '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+    }
+
     all_results = []
     
     for item in TARGET_ITEMS:
         try:
             url = f"https://ikman.lk/en/ads/sri-lanka/building-materials?query={item.replace(' ', '%20')}"
-            response = scraper.get(url, timeout=15)
+            response = scraper.get(url, headers=headers, timeout=15)
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
