@@ -240,17 +240,20 @@ def calculate_truth_score(item_name, item_history):
     score = 0
     
     # 1. Freshness (Max 50)
-    if latest_point['source_type'] == 'Audited':
-        score += 50
-    elif latest_point['source_type'] == 'Live':
+    age_hours = (datetime.now() - latest_point['timestamp']).total_seconds() / 3600
+    
+    if latest_point['source_type'] in ['Audited', 'Live']:
         score += 50
     else:
-        # Penalize if last data point is old
-        age_hours = (datetime.now() - latest_point['timestamp']).total_seconds() / 3600
-        if age_hours < 24:
-            score += 35
+        # Improved weights for recent historical data
+        if age_hours < 1:
+            score += 48 # Ultra-fresh
+        elif age_hours < 6:
+            score += 45
+        elif age_hours < 24:
+            score += 40 # Standard daily fresh
         else:
-            score += max(0, 20 - (age_hours / 48))
+            score += max(0, 25 - (age_hours / 24))
 
     # 2. Source Alignment (Max 30)
     has_audit = 'Audited' in item_history['source_type'].values
@@ -260,16 +263,18 @@ def calculate_truth_score(item_name, item_history):
     if has_audit: score += 30
     elif has_live and has_hist: score += 30
     elif has_live: score += 25
+    elif has_hist: score += 20 # Boosted from 10
     else: score += 10
         
     # 3. Stability (Max 20)
     if len(item_history) > 3:
         std = item_history['price'].tail(5).std()
         mean = item_history['price'].tail(5).mean()
-        coeff_var = std / mean if mean != 0 else 1
-        score += max(0, 20 - (coeff_var * 100))
+        coeff_var = std / mean if mean != 0 else 0
+        # More generous stability curve
+        score += max(0, 20 - (coeff_var * 50))
     else:
-        score += 10
+        score += 15
         
     return min(100, int(score))
 
@@ -662,6 +667,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
