@@ -19,27 +19,14 @@ if 'authenticated' not in st.session_state:
 if 'role' not in st.session_state:
     st.session_state.role = None
 
-# --- Helper for Background ---
-def get_base64(bin_file):
-    try:
-        with open(bin_file, 'rb') as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
-    except:
-        return None
-
-bg_path = os.path.join(os.path.dirname(__file__), "monolith_tactical_bg.png")
-bin_str = get_base64(bg_path)
-
 # --- 3. PREMIUM CSS (TACTICAL DESIGN SYSTEM) ---
-bg_style = f"background: url('data:image/png;base64,{bin_str}'); background-size: cover; background-attachment: fixed;" if bin_str else "background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #05070a 100%);"
-
-st.markdown(f"""
+st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
-:root {{
+:root {
     --bg-deep: #05070a;
+    --bg-surface: #0a0e14;
     --accent-primary: #3182ce;
     --accent-glow: rgba(49, 130, 206, 0.2);
     --text-main: #f7fafc;
@@ -48,13 +35,13 @@ st.markdown(f"""
     --status-red: #f56565;
     --glass-bg: rgba(10, 15, 25, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
-}}
+}
 
-.stApp {{ 
-    {bg_style}
+.stApp { 
+    background: radial-gradient(circle at 50% 50%, #0d121a 0%, #05070a 100%);
     color: var(--text-main);
     font-family: 'Outfit', sans-serif;
-}}
+}
 
 /* Global Glass Overlay */
 .stApp::before {{
@@ -686,6 +673,7 @@ else:
             </p>
         </div>
     """, unsafe_allow_html=True)
+
 
 
 
