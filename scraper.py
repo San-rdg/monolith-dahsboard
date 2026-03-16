@@ -41,29 +41,29 @@ def fetch_live_prices():
             
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
-                # Use regex for more resilient class matching as class names can be dynamic
-                listings = soup.find_all('li', class_=re.compile(r'normal--.*'))[:3] 
+                # Even more flexible searching
+                listings = soup.find_all(['li', 'div'], class_=re.compile(r'(normal|item|ad-item).*'))[:3] 
                 
                 for listing in listings:
                     try:
-                        name_tag = listing.find('h2', class_=re.compile(r'title--.*'))
-                        price_tag = listing.find('div', class_=re.compile(r'price--.*'))
+                        name_tag = listing.find(['h2', 'span'], class_=re.compile(r'(title|name).*'))
+                        price_tag = listing.find(['div', 'span'], class_=re.compile(r'.*price.*'))
                         
-                        if name_tag and price_tag:
+                        if name_tag and price_tag and 'Rs' in price_tag.text:
                             name = name_tag.text.strip()
-                            price_str = price_tag.text.replace('Rs', '').replace(',', '').strip()
+                            price_str = re.sub(r'[^\d.]', '', price_tag.text)
                             price = float(price_str)
                             
                             all_results.append({
                                 "timestamp": datetime.now().isoformat(),
-                                "item": name,
+                                "item": f"{name} (Live)",
                                 "price": price,
                                 "source": "Ikman_Live",
                                 "base_category": item
                             })
                     except Exception:
                         continue
-            time.sleep(1) # Prevent aggressive scraping
+            time.sleep(1)
         except Exception as e:
             print(f"Error scraping {item}: {e}")
 
