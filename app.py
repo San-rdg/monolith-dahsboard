@@ -7,6 +7,7 @@ import hashlib
 from datetime import datetime, timedelta
 from streamlit_autorefresh import st_autorefresh
 import scraper # My new live scraper module
+import json
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(page_title="MONOLITH | OS", page_icon="🏗️", layout="wide")
