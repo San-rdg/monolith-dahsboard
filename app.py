@@ -176,6 +176,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 4. DATA ENGINES ---
+AUDIT_FILE = "manual_audits.json"
+
 def fetch_live_market_data():
     base_path = os.path.dirname(__file__)
     file_path = os.path.join(base_path, "price_history.csv")
@@ -202,6 +204,17 @@ def fetch_live_market_data():
             df = pd.concat([df, live_df], ignore_index=True)
     except: pass
 
+    # 3. Ingest Manual Audits
+    if os.path.exists(AUDIT_FILE):
+        try:
+            with open(AUDIT_FILE, 'r') as f:
+                audits = json.load(f)
+                audit_df = pd.DataFrame(audits)
+                audit_df['timestamp'] = pd.to_datetime(audit_df['timestamp'])
+                audit_df['source_type'] = 'Audited'
+                df = pd.concat([df, audit_df], ignore_index=True)
+        except: pass
+
     if df.empty: return pd.DataFrame()
     
     df = df.dropna(subset=['timestamp'])
@@ -221,7 +234,9 @@ def calculate_truth_score(item_name, item_history):
     score = 0
     
     # 1. Freshness (Max 50)
-    if latest_point['source_type'] == 'Live':
+    if latest_point['source_type'] == 'Audited':
+        score += 50
+    elif latest_point['source_type'] == 'Live':
         score += 50
     else:
         # Penalize if last data point is old
@@ -232,14 +247,14 @@ def calculate_truth_score(item_name, item_history):
             score += max(0, 20 - (age_hours / 48))
 
     # 2. Source Alignment (Max 30)
+    has_audit = 'Audited' in item_history['source_type'].values
     has_live = 'Live' in item_history['source_type'].values
     has_hist = 'Historical' in item_history['source_type'].values
-    if has_live and has_hist:
-        score += 30
-    elif has_live:
-        score += 25
-    else:
-        score += 10
+    
+    if has_audit: score += 30
+    elif has_live and has_hist: score += 30
+    elif has_live: score += 25
+    else: score += 10
         
     # 3. Stability (Max 20)
     if len(item_history) > 3:
@@ -426,7 +441,30 @@ else:
         else:
             st.warning("SYSTEM_OFFLINE: Awaiting Market Data Sync...")
             
-        st.markdown("<br>"*10, unsafe_allow_html=True)
+        st.markdown("---")
+        st.markdown("### 🛠️ COMMAND_OVERRIDE")
+        with st.expander("MANUAL_MARKET_AUDIT", expanded=False):
+            st.caption("Inject human-verified truth data.")
+            item_to_audit = st.selectbox("TARGET_MATERIAL", [i['item'] for i in live_items] if live_items else ["None"])
+            new_val = st.number_input("VERIFIED_PRICE (Rs)", value=0.0)
+            if st.button("AUDIT & VOUCH", use_container_width=True):
+                # Save to manual_audits.json
+                current_audits = []
+                if os.path.exists(AUDIT_FILE):
+                    with open(AUDIT_FILE, 'r') as f: current_audits = json.load(f)
+                
+                current_audits.append({
+                    "timestamp": datetime.now().isoformat(),
+                    "item": item_to_audit,
+                    "price": new_val,
+                    "source": "Human_Operator",
+                    "source_type": "Audited"
+                })
+                with open(AUDIT_FILE, 'w') as f: json.dump(current_audits, f)
+                st.success("AUDIT LOGGED: TRUTH SCORE RECALCULATING...")
+                st.rerun()
+
+        st.markdown("<br>"*5, unsafe_allow_html=True)
         if st.button("TERMINATE SESSION", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
@@ -603,6 +641,7 @@ else:
         )
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 
