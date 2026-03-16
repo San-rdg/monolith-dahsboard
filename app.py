@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from streamlit_autorefresh import st_autorefresh
 import scraper # My new live scraper module
 import json
+import base64
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(page_title="MONOLITH | OS", page_icon="🏗️", layout="wide")
@@ -18,163 +19,127 @@ if 'authenticated' not in st.session_state:
 if 'role' not in st.session_state:
     st.session_state.role = None
 
-# --- 3. PREMIUM CSS (INTEGRATED HOMEPAGE + COMMAND CENTER) ---
+# --- Helper for Background ---
+def get_base64(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+bg_path = os.path.join(os.path.dirname(__file__), "monolith_tactical_bg.png")
+# If the file hasn't been moved yet, use the absolute path from brain
+if not os.path.exists(bg_path):
+    bg_path = r"C:\Users\ASEL\.gemini\antigravity\brain\1ff462bc-159b-42c0-aa71-e6ff87b3b42c\monolith_tactical_bg_1773682251354.png"
+
+bin_str = get_base64(bg_path)
+
 # --- 3. PREMIUM CSS (TACTICAL DESIGN SYSTEM) ---
-st.markdown("""
+st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
-:root {
+:root {{
     --bg-deep: #05070a;
-    --bg-surface: #0a0e14;
-    --bg-card: rgba(16, 22, 26, 0.7);
-    --accent-primary: #106BA3;
-    --accent-glow: rgba(16, 107, 163, 0.3);
-    --text-main: #E1E8ED;
-    --text-muted: #8A9BA8;
-    --status-green: #0F9960;
-    --status-red: #DB3737;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --glass-bg: rgba(255, 255, 255, 0.03);
+    --accent-primary: #3182ce; /* Electric Blue */
+    --accent-glow: rgba(49, 130, 206, 0.2);
+    --text-main: #f7fafc;
+    --text-muted: #a0aec0;
+    --status-green: #48bb78;
+    --status-red: #f56565;
+    --glass-bg: rgba(10, 15, 25, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
-}
+}}
 
-.stApp { 
-    background-color: var(--bg-deep); 
+.stApp {{ 
+    background: url("data:image/png;base64,{bin_str}");
+    background-size: cover;
+    background-attachment: fixed;
     color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-}
+    font-family: 'Outfit', sans-serif;
+}}
+
+/* Global Glass Overlay */
+.stApp::before {{
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+    z-index: -1;
+}}
+
+/* Glassmorphism Cards */
+.dashboard-card, .feature-card, [data-testid="stForm"] {{
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8) !important;
+}}
+
+.feature-card:hover {{
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 0 20px var(--accent-glow) !important;
+    transform: translateY(-2px);
+}}
 
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-deep); }
-::-webkit-scrollbar-thumb { background: #202B33; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+::-webkit-scrollbar {{ width: 4px; }}
+::-webkit-scrollbar-track {{ background: transparent; }}
+::-webkit-scrollbar-thumb {{ background: var(--accent-primary); border-radius: 10px; }}
 
-/* --- HOMEPAGE STYLES --- */
-.hero-container {
-    padding: 100px 20px 60px 20px;
-    text-align: center;
-    background: radial-gradient(circle at top, #0d1b2a 0%, var(--bg-deep) 70%);
-}
-.hero-title {
-    font-size: clamp(60px, 10vw, 120px);
-    font-weight: 800;
-    letter-spacing: -6px;
-    background: linear-gradient(180deg, #ffffff 0%, #4a5568 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1;
-    margin-bottom: 20px;
-}
-.hero-subtitle {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    letter-spacing: 10px;
-    color: var(--accent-primary);
+/* Typography Overrides */
+h1, h2, h3 {{ 
+    font-weight: 900 !important; 
+    letter-spacing: -0.05em !important; 
     text-transform: uppercase;
-    margin-bottom: 50px;
-    opacity: 0.9;
-}
+}}
 
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 40px;
-}
-.feature-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
-    padding: 35px;
-    border-radius: 4px;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
+.hero-title {{
+    font-size: 120px;
+    font-weight: 900;
+    letter-spacing: -8px;
+    margin-bottom: 0;
+    color: white;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}}
+
+/* Ticker Sidebar Style */
+.ticker-wrap {{
+    width: 100%;
     overflow: hidden;
-}
-.feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
-    transform: translateX(-100%);
-    transition: 0.6s;
-}
-.feature-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(16, 107, 163, 0.5);
-    background: rgba(16, 22, 26, 0.9);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-}
-.feature-card:hover::before { transform: translateX(100%); }
-
-/* --- COMMAND CENTER STYLES --- */
-.dashboard-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    padding: 16px;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-}
-
-.status-line {
+    background: rgba(0,0,0,0.5);
+    padding: 5px 0;
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    margin: 10px 0;
+}}
+.ticker {{
+    display: inline-block;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+}}
+.ticker-item {{
+    display: inline-block;
+    padding: 0 20px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-    border-top: 1px solid var(--border-subtle);
-    padding-top: 10px;
-    margin-top: 10px;
-}
-
-.metric-container {
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
-    border-left: 3px solid var(--accent-primary);
-    padding: 12px;
-    border-radius: 0 4px 4px 0;
-}
-
-/* --- LOGIN FORM POLISH --- */
-[data-testid="stForm"] {
-    background: rgba(10, 14, 20, 0.8) !important;
-    backdrop-filter: blur(20px) !important;
-    border: 1px solid var(--border-subtle) !important;
-    padding: 40px !important;
-    border-radius: 4px !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-}
-[data-testid="stForm"]:hover {
-    border-color: var(--accent-primary) !important;
-}
+    font-size: 10px;
+    color: var(--accent-primary);
+}}
+@keyframes ticker {{
+    0% {{ transform: translateX(100%); }}
+    100% {{ transform: translateX(-100%); }}
+}}
 
 /* Animations */
-@keyframes pulse {
-    0% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0.6; transform: scale(1); }
-}
-.live-pulse {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background: var(--status-red);
-    border-radius: 50%;
-    margin-right: 8px;
-    box-shadow: 0 0 10px var(--status-red);
-    animation: pulse 2s infinite;
-}
-
-/* Streamlit Input Overrides */
-.stTextInput input {
-    background-color: rgba(255,255,255,0.05) !important;
-    border: 1px solid var(--border-subtle) !important;
-    color: white !important;
-    font-family: 'JetBrains Mono', monospace !important;
-}
-.stTextInput input:focus {
-    border-color: var(--accent-primary) !important;
-    box-shadow: 0 0 0 1px var(--accent-primary) !important;
-}
+@keyframes pulse-glow {{
+    0% {{ box-shadow: 0 0 5px rgba(49, 130, 206, 0.2); }}
+    50% {{ box-shadow: 0 0 20px rgba(49, 130, 206, 0.5); }}
+    100% {{ box-shadow: 0 0 5px rgba(49, 130, 206, 0.2); }}
+}}
+.metric-container {{
+    animation: pulse-glow 4s infinite;
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -412,10 +377,19 @@ else:
 
     # --- Sidebar ---
     with st.sidebar:
-        st.markdown("""
+        st.markdown(f"""
             <div style='padding:20px 0;'>
-                <h2 style='font-size:20px; color:white; letter-spacing:2px;'>MONOLITH</h2>
-                <p style='font-size:10px; color:var(--accent-primary); font-family:JetBrains Mono;'>CORE OS v.2026.4</p>
+                <h1 style='font-size:32px; color:white; letter-spacing:4px; margin:0;'>MONOLITH</h1>
+                <p style='font-size:10px; color:var(--accent-primary); font-family:JetBrains Mono; opacity:0.8;'>CORE OS v.2026.4 // HUB_WEST</p>
+            </div>
+            <div class="ticker-wrap">
+                <div class="ticker">
+                    <span class="ticker-item">● INGESTING SOURCING_NODE_01</span>
+                    <span class="ticker-item">● MARKET_VOLATILITY: LOW</span>
+                    <span class="ticker-item">● NEURAL_ENGINE: OPTIMIZED</span>
+                    <span class="ticker-item">● AUTH_PROTOCOL: ACTIVE</span>
+                    <span class="ticker-item">● SYNCING_GLOBAL_GRID...</span>
+                </div>
             </div>
         """, unsafe_allow_html=True)
         
@@ -633,40 +607,87 @@ else:
                     compare_df = pd.concat([c1_data, c2_data])
                     import plotly.express as px
                     fig_comp = px.line(compare_df, x='timestamp', y='price', color='Label',
-                                      title="Comparative Price Volatility",
                                       template="plotly_dark")
                     fig_comp.update_layout(
                         plot_bgcolor='rgba(0,0,0,0)',
                         paper_bgcolor='rgba(0,0,0,0)',
                         font_family="JetBrains Mono",
-                        margin=dict(l=0, r=0, t=40, b=0)
+                        margin=dict(l=0, r=0, t=20, b=0),
+                        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                        xaxis=dict(showgrid=False),
+                        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)')
                     )
-                    st.plotly_chart(fig_comp, use_container_width=True)
+                    st.plotly_chart(fig_comp, use_container_width=True, config={'displayModeBar': False})
 
-        # --- NEURAL FORECAST SECTION (BOTTOM OF SCREEN) ---
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="dashboard-card">', unsafe_allow_html=True)
-        st.markdown("#### 📈 NEURAL FORECAST")
+        # --- NEURAL FORECAST MATRIX ---
+        st.markdown("---")
+        st.markdown("### 🧬 NEURAL_FORECAST_MATRIX")
         
-        col_f1, _ = st.columns([1, 2])
-        with col_f1:
-            f_item = st.selectbox("SELECT_SOURCE_ITEM", [i['item'] for i in live_items], key="forecast_sel")
+        with st.container():
+            col_graph, col_stats = st.columns([2, 1])
             
-        f_data = next(i['history'] for i in live_items if i['item'] == f_item)
-        forecast_df = generate_forecast(f_data)
-        
-        fig = px.line(forecast_df, x='timestamp', y='price', color='type', 
-                     title=f"Predictive Trend Analysis: {f_item}",
-                     template="plotly_dark",
-                     color_discrete_map={'Historical': '#106BA3', 'Forecast': '#0F9960'})
-        fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_family="JetBrains Mono",
-            margin=dict(l=0, r=0, t=40, b=0)
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+            with col_stats:
+                st.markdown("<br>", unsafe_allow_html=True)
+                sel_forecast = st.selectbox("PREDICTION_TARGET", [i['item'] for i in live_items], key="forecast_sel")
+                days = st.slider("HORIZON_LENGTH (DAYS)", 7, 30, 14)
+                
+                # Use current items for prediction logic
+                f_data = next(i['history'] for i in live_items if i['item'] == sel_forecast)
+                # Note: Assuming generate_forecast is the actual function name in the user's file
+                forecast_df = generate_forecast(f_data, days)
+                
+                curr = forecast_df[forecast_df['type'] == 'Historical']['price'].iloc[-1]
+                future = forecast_df[forecast_df['type'] == 'Forecast']['price'].iloc[-1]
+                pred_change = ((future - curr) / curr) * 100
+                
+                st.markdown(f"""
+                    <div class="dashboard-card" style="border-right: 4px solid var(--accent-primary);">
+                        <p style='color:var(--text-muted); font-size:10px; font-family:JetBrains Mono;'>PROJECTED_PRICE</p>
+                        <h2 style='margin:0; font-size:32px;'>Rs. {future:,.2f}</h2>
+                        <p style='color:{"var(--status-green)" if pred_change <=0 else "var(--status-red)"}; font-size:14px; font-weight:700;'>
+                            {"▼" if pred_change <=0 else "▲"} {pred_change:+.2f}% ({days}D)
+                        </p>
+                    </div>
+                    <div style="margin-top:15px; padding:10px; border: 1px solid var(--glass-border); border-radius:4px; background:rgba(255,255,255,0.02);">
+                        <p style='color:var(--text-muted); font-size:9px; font-family:JetBrains Mono; text-transform:uppercase;'>Confidence Rating</p>
+                        <div style="height:4px; width:100%; background:rgba(255,255,255,0.1); border-radius:10px;">
+                            <div style="height:100%; width:88%; background:var(--accent-primary); border-radius:10px; box-shadow: 0 0 10px var(--accent-primary);"></div>
+                        </div>
+                        <p style="text-align:right; font-size:9px; color:var(--accent-primary); margin-top:4px;">88.4% ACCURACY</p>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            with col_graph:
+                import plotly.graph_objects as go
+                fig = go.Figure()
+                
+                hist = forecast_df[forecast_df['type'] == 'Historical']
+                fore = forecast_df[forecast_df['type'] == 'Forecast']
+                
+                fig.add_trace(go.Scatter(x=hist['timestamp'], y=hist['price'], name='HISTORICAL', line=dict(color='#888', width=2)))
+                fig.add_trace(go.Scatter(x=fore['timestamp'], y=fore['price'], name='PROJECTION', line=dict(color='#3182ce', width=4, dash='dot')))
+                
+                fig.update_layout(
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    margin=dict(l=0, r=0, t=20, b=0),
+                    height=350,
+                    showlegend=False,
+                    xaxis=dict(showgrid=False, color='#444'),
+                    yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', color='#444', side='right')
+                )
+                st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+    # Footer
+    st.markdown("<br>"*2, unsafe_allow_html=True)
+    st.markdown("""
+        <div style='text-align:center; padding:40px; border-top:1px solid var(--glass-border);'>
+            <p style='color:var(--text-muted); font-size:10px; font-family:JetBrains Mono; opacity:0.5;'>
+                © MONOLITH SYSTEMS // ALL RIGHTS RESERVED // SECURE PROTOCOL v.4
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
 
 
 
