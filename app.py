@@ -697,6 +697,9 @@ else:
             <p style='color:var(--text-muted); font-size:10px; font-family:JetBrains Mono; opacity:0.5;'>
                 © MONOLITH SYSTEMS // ALL RIGHTS RESERVED // SECURE PROTOCOL v.4
             </p>
+            <p style='color:var(--text-muted); font-size:9px; font-family:JetBrains Mono; opacity:0.7; margin-top:4px;'>
+                Disclaimer: Prices are derived from latest available data and may not reflect 100% market accuracy.
+            </p>
         </div>
     """, unsafe_allow_html=True)
 
