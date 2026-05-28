@@ -10,6 +10,30 @@ import scraper # My new live scraper module
 import json
 import base64
 
+# --- 4. PRICE DATA CACHE & HELPER ---
+@st.cache_data(ttl=60)
+def load_price_history() -> dict:
+    """Load the latest price for each item from price_history.csv."""
+    csv_path = os.path.join(os.path.dirname(__file__), "price_history.csv")
+    if os.path.exists(csv_path):
+        df = pd.read_csv(csv_path)
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        latest = df.sort_values('timestamp').groupby('item').last().reset_index()
+        return dict(zip(latest['item'], latest['price']))
+    return {}
+
+PRICE_DATA = load_price_history()
+
+def get_latest_price(item_name: str) -> tuple[float, str]:
+    """Return (price, source) where source is 'Historical' if from CSV cache else 'Live'."""
+    if item_name in PRICE_DATA:
+        return float(PRICE_DATA[item_name]), "Historical"
+    # fallback to live price (look up in live_items list later)
+    for itm in live_items:
+        if itm["item"] == item_name:
+            return itm["price"], "Live"
+    return 0.0, "Unknown"
+
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(page_title="MONOLITH | OS", page_icon="🏗️", layout="wide")
 
@@ -521,16 +545,18 @@ else:
             """, unsafe_allow_html=True)
             
             for item in live_items:
+                # Get the most accurate price and its source
+                price, src = get_latest_price(item['item'])
                 color = "var(--status-green)" if item['change'] >= 0 else "var(--status-red)"
                 arrow = "▲" if item['change'] >= 0 else "▼"
                 st.markdown(f"""
                     <div style="padding:12px; margin-bottom:8px; background:rgba(255,255,255,0.02); border-radius:4px; border-left: 2px solid {color};">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <span style="font-weight:600; font-size:14px;">{item['item']}</span>
-                            <span style="color:{color}; font-family:JetBrains Mono; font-weight:700;">Rs.{item['price']:,.0f}</span>
+                            <span style="color:{color}; font-family:JetBrains Mono; font-weight:700;">Rs.{price:,.0f} {'✔︎' if src=='Historical' else '🔄'}</span>
                         </div>
                         <div style="display:flex; justify-content:space-between; transform: translateY(2px);">
-                            <span style="color:var(--text-muted); font-size:10px; font-family:JetBrains Mono;">{item.get('source', 'CENTRAL_NODE')}</span>
+                            <span style="color:var(--text-muted); font-size:10px; font-family:JetBrains Mono;">{src}</span>
                             <span style="color:{color}; font-size:11px; font-weight:700;">{arrow} {item['change']:+.2f}%</span>
                         </div>
                     </div>
